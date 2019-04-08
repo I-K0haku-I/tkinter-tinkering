@@ -1,14 +1,13 @@
+import enum
 import tkinter as tk
 import os
 from tkinter import ttk
-
-from frames import AddNotesWindow, NoteOverview
+from .stuff import ViewRefs
 
 DEFAULT_NOTES_PATH = '.\\notes\\'
 
 def add_file():
     popup = tk.Toplevel()
-
     popup.title('test')
     label = ttk.Label(popup, text='test')
     label.pack(side='top', fill='x', pady=10)
@@ -48,13 +47,13 @@ class NotesApp(tk.Tk):
         self.selected_file = tk.StringVar(self)
 
         self.frames = {}
-        frame_list = (StartPage, NoteOverview)
+        frame_list = (ViewRefs.START, ViewRefs.NOTES_OVERVIEW)
         for F in frame_list:
             frame = F(self.container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky='nsew')
 
-        self.show_frame(StartPage)
+        self.show_frame(ViewRefs.START)
     
     def show_frame(self, cont):
         frame = self.frames.get(cont)
@@ -66,27 +65,12 @@ class NotesApp(tk.Tk):
     
     def get_file_path(self):
         return self.notes_path.get() + self.selected_file.get()
-    
-    # TODO: might remove
-    def set_var(self, cont, name, val):
-        if hasattr(self.frames[cont], name):
-            setattr(self.frames[cont], name, val)
-
-
-class StartPage(tk.Frame):
-    def __init__(self, parent, controller):
-        super().__init__(parent)
-        label = ttk.Label(self, text='Hello World')
-        label.pack(pady=10, padx=10)
-
-        button = ttk.Button(self, text='ACTUALLY Start App', command=lambda: controller.show_frame(NoteOverview))
-        button.pack()
 
 
 def print_text(text):
     print(text)
 
-app = NotesApp()
-app.geometry('640x480')
-app.mainloop()
-app.destroy()
+# app = NotesApp()
+# app.geometry('640x480')
+# app.mainloop()
+# app.destroy()
