@@ -1,4 +1,4 @@
-from tkinter import ttk 
+from tkinter import ttk
 import tkinter as tk
 
 
@@ -9,5 +9,6 @@ class StartPage(tk.Frame):
         label.pack(pady=10, padx=10)
 
         from app.stuff import ViewRefs
-        button = ttk.Button(self, text='ACTUALLY Start App', command=lambda: controller.show_frame(ViewRefs.START))
+        button = ttk.Button(self, text='ACTUALLY Start App',
+                            command=lambda: controller.show_frame(ViewRefs.NOTES_OVERVIEW))
         button.pack()

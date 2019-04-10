@@ -12,7 +12,6 @@ class NoteOverview(tk.Frame):
         super().__init__(parent)
         self.ctrlr = controller
 
-
         self.columnconfigure(0, weight=1)
         self.columnconfigure(3, pad=7)
         self.rowconfigure(1, weight=1)
@@ -36,13 +35,29 @@ class NoteOverview(tk.Frame):
 
         self.buttons_down = tk.Frame(self)
         self.buttons_down.grid(row=2, column=0, sticky=N+E+S+W)
+        self.add_today_btn = ttk.Button(
+            self.buttons_down, text='New File...', command=self.add_current_date)
+        self.add_today_btn.pack(side='left', fill='both', expand=True)
+
+        # TODO: disable if file already exists
+        # self.add_today_btn['default'] = tk.DISABLED
+
         self.create_btn = ttk.Button(
             self.buttons_down, text='New File...', command=self.create_new_file)
         self.create_btn.pack(side='left', fill='both', expand=True)
-        self.create_btn2 = ttk.Button(
+
+        self.back_btn = ttk.Button(
             self.buttons_down, text='Back', command=lambda: controller.show_frame(StartPage))
-        self.create_btn2.pack()
-        self.create_btn2.pack(side='left', fill='both', expand=True)
+        self.back_btn.pack(side='left', fill='both', expand=True)
+
+    def add_current_date(self):
+        # TODO: kinda important so I can auto create files
+        # 0: get current date
+        # 1: see if current year there, create it it isn't
+        # 2: same for month
+        # 3: add current date as file from 01 to 31
+        # NOTE: maybe I could use a proper db for this
+        pass
 
     def create_new_file(self):
         print('hi')

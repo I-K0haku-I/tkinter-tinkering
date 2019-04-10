@@ -40,10 +40,12 @@ class AddNotesWindow(tk.Frame):
         self.buttons_down.grid_columnconfigure(0, weight=1)
         self.buttons_down.grid_columnconfigure(1, weight=1)
 
-        self.savebtn = ttk.Button(self.buttons_down, text='Save', command=self.save)
+        self.savebtn = ttk.Button(
+            self.buttons_down, text='Save', command=self.save)
         self.savebtn.grid(row=0, column=0, sticky=N+W+E+S)
 
-        self.closebtn = ttk.Button(self.buttons_down, text='Close', command=self.close)
+        self.closebtn = ttk.Button(
+            self.buttons_down, text='Close', command=self.close)
         self.closebtn.grid(row=0, column=1, sticky=N+E+W+S)
 
     def save(self):
