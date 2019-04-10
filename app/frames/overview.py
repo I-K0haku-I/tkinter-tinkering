@@ -1,5 +1,6 @@
 import tkinter as tk
 import os
+from datetime import datetime
 from tkinter import ttk
 from tkinter import N, E, S, W
 
@@ -19,14 +20,15 @@ class NoteOverview(tk.Frame):
 
         label = ttk.Label(self, text='First Page')
         label.grid(row=0, column=0)
+    
+        self.listbox = tk.Listbox(self)
+        self.listbox.insert(tk.END, '...')
         try:
             files = os.listdir(controller.notes_path.get())
         except FileNotFoundError:
-            os.mkdir(os.getcwd()+controller.notes_path.get())
+            os.mkdir(os.getcwd() + controller.notes_path.get())
             files = os.listdir(controller.notes_path.get())
-
-        self.listbox = tk.Listbox(self)
-        self.listbox.insert(tk.END, '...')
+        # TODO: need to separate dirs and files, dirs should end with a slash and be on top
         for file in files:
             self.listbox.insert(tk.END, file)
 
@@ -36,7 +38,7 @@ class NoteOverview(tk.Frame):
         self.buttons_down = tk.Frame(self)
         self.buttons_down.grid(row=2, column=0, sticky=N+E+S+W)
         self.add_today_btn = ttk.Button(
-            self.buttons_down, text='New File...', command=self.add_current_date)
+            self.buttons_down, text='Add Today', command=self.add_current_date)
         self.add_today_btn.pack(side='left', fill='both', expand=True)
 
         # TODO: disable if file already exists
@@ -51,13 +53,19 @@ class NoteOverview(tk.Frame):
         self.back_btn.pack(side='left', fill='both', expand=True)
 
     def add_current_date(self):
-        # TODO: kinda important so I can auto create files
-        # 0: get current date
-        # 1: see if current year there, create it it isn't
-        # 2: same for month
-        # 3: add current date as file from 01 to 31
+        time = datetime.now()
+        year, month, day = (str(time.year), str(time.month), str(time.day))
+        root = self.ctrlr.notes_path.get()
+        year_path = f'{root}{year}/'
+        if not os.path.isdir(year_path):
+            os.mkdir(year_path)
+        month_path = f'{root}{year}/{month}/'
+        if not os.path.isdir(month):
+            os.mkdir(root + year + '/' + month)
+        day_path = f'{root}{year}/{month}/{day}.note'
+        open(day_path, 'a').close()
+
         # NOTE: maybe I could use a proper db for this
-        pass
 
     def create_new_file(self):
         print('hi')
@@ -66,6 +74,8 @@ class NoteOverview(tk.Frame):
         name = self.listbox.selection_get()
         if name == '...':
             print('TODO: implement return to upper level directory')
+            # but prevent returning if in root
             return
+        # TODO: check if dir and load it in this frame instead
         self.ctrlr.selected_file.set(name)
         self.ctrlr.show_frame(AddNotesWindow)
