@@ -1,5 +1,6 @@
 import tkinter as tk
 import os
+from pathlib import Path
 from datetime import datetime
 from tkinter import ttk
 from tkinter import N, E, S, W
@@ -23,11 +24,10 @@ class NoteOverview(tk.Frame):
     
         self.listbox = tk.Listbox(self)
         self.listbox.insert(tk.END, '...')
-        try:
-            files = os.listdir(controller.notes_path.get())
-        except FileNotFoundError:
-            os.mkdir(os.getcwd() + controller.notes_path.get())
-            files = os.listdir(controller.notes_path.get())
+        notes = Path(controller.notes_path.get())
+        if not notes.exists():
+            notes.mkdir()
+        files = os.listdir(controller.notes_path.get())
         # TODO: need to separate dirs and files, dirs should end with a slash and be on top
         for file in files:
             self.listbox.insert(tk.END, file)
@@ -55,15 +55,16 @@ class NoteOverview(tk.Frame):
     def add_current_date(self):
         time = datetime.now()
         year, month, day = (str(time.year), str(time.month), str(time.day))
-        root = self.ctrlr.notes_path.get()
-        year_path = f'{root}{year}/'
+        root = Path(self.ctrlr.notes_path.get())
+        year_path = root / year
         if not os.path.isdir(year_path):
             os.mkdir(year_path)
-        month_path = f'{root}{year}/{month}/'
-        if not os.path.isdir(month):
-            os.mkdir(root + year + '/' + month)
-        day_path = f'{root}{year}/{month}/{day}.note'
+        month_path = year_path / month
+        if not os.path.isdir(month_path):
+            os.mkdir(month_path)
+        day_path = month_path / (day + '.note')
         open(day_path, 'a').close()
+        self.ctrlr.show_frame(NoteOverview)
 
         # NOTE: maybe I could use a proper db for this
 
