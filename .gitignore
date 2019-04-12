@@ -1,6 +1,6 @@
 *.png
+*.pyc
 .vscode
-__pycache__
 test.py
 testing.py
 notes
