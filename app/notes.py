@@ -44,7 +44,7 @@ class NotesApp(tk.Tk):
         self.config(menu=menubar)
 
         self.notes_path = tk.StringVar(self, DEFAULT_NOTES_PATH)
-        self.selected_file = tk.StringVar(self)
+        self.selected_node = tk.StringVar(self) # TODO: do list of selected notes
 
         self.frames = {}
         frame_list = (ViewRefs.START, ViewRefs.NOTES_OVERVIEW)
@@ -64,7 +64,7 @@ class NotesApp(tk.Tk):
         self.frames[cont] = frame
     
     def get_file_path(self):
-        return self.notes_path.get() + self.selected_file.get()
+        return self.notes_path.get() + self.selected_node.get()
 
 
 def print_text(text):

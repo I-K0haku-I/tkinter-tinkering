@@ -27,7 +27,7 @@ class NoteOverview(tk.Frame):
         notes = Path(controller.notes_path.get())
         if not notes.exists():
             notes.mkdir()
-        files = os.listdir(controller.notes_path.get())
+        files = os.listdir(controller.notes_path.get()) # TODO: load from current working path
         # TODO: need to separate dirs and files, dirs should end with a slash and be on top
         for file in files:
             self.listbox.insert(tk.END, file)
@@ -73,10 +73,16 @@ class NoteOverview(tk.Frame):
 
     def on2ClickItem(self, event):
         name = self.listbox.selection_get()
+        print((Path(self.ctrlr.notes_path.get()) / Path(name)))
         if name == '...':
             print('TODO: implement return to upper level directory')
             # but prevent returning if in root
             return
-        # TODO: check if dir and load it in this frame instead
-        self.ctrlr.selected_file.set(name)
-        self.ctrlr.show_frame(AddNotesWindow)
+        # !!!!!!TODO: check if dir and load it in this frame instead
+        if Path(name).is_dir():
+            print('yes') 
+        # TODO: if selected node is dir
+        # then add node to list of nodes and show this frame again
+
+        # self.ctrlr.selected_file.set(name)
+        # self.ctrlr.show_frame(AddNotesWindow)
