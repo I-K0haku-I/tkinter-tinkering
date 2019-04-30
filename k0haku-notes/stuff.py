@@ -1,4 +1,4 @@
-from app.frames import AddNotesWindow, StartPage, NoteOverview
+from frames import AddNotesWindow, StartPage, NoteOverview
 
 # TODO: instead of classes use strings
 # import that string object in the main file and in all frames

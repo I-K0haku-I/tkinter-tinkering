@@ -2,9 +2,14 @@ import enum
 import tkinter as tk
 import os
 from tkinter import ttk
-from .stuff import ViewRefs
+from stuff import ViewRefs
 
-DEFAULT_NOTES_PATH = '.\\notes\\'
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+DEFAULT_NOTES_PATH = ROOT_DIR + '\\data\\notes\\'
+
+print(ROOT_DIR)
+print(DEFAULT_NOTES_PATH)
 
 def add_file():
     popup = tk.Toplevel()
