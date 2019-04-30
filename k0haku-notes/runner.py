@@ -1,4 +1,4 @@
-from app.notes import NotesApp
+from notes import NotesApp
 
 if __name__ == "__main__":
     app = NotesApp()
