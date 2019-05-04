@@ -2,15 +2,21 @@ from tkinter import ttk
 import tkinter as tk
 from tkinter import W, E, N, S
 
+class AddNotesWindowController:
+    def __init__(self, parent, controller):
+        self.parent_controller = controller
+        self.view = AddNotesWindow(parent)
+
 
 class AddNotesWindow(tk.Frame):
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent):
         super().__init__(parent)
         self.save_callback = save_to_file
-        self.file_path = controller.get_file_path()
-        self.file = open(self.file_path)
-        self.note_txt = self.file.read()
+        # self.file_path = controller.get_file_path()
+        # self.file = open(self.file_path)
+        # self.note_txt = self.file.read()
+        self.note_txt = ''
         self.initUI()
 
     def set_save_callback(self, callback):

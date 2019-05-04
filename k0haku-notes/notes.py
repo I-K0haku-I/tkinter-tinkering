@@ -26,13 +26,10 @@ def create_popup(title='Popup', msg='', buttons=('OK',)):
 # probably just mimic what you did in the backend
 
 
-class NotesApp(tk.Tk):
+class NotesApp2(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.title('Notes')
-
-        self.
 
         self.notes_path = tk.StringVar(self, DEFAULT_NOTES_PATH)
         self.selected_node = tk.StringVar(self)  # TODO: do list of selected notes
