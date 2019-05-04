@@ -2,6 +2,7 @@ from tkinter import ttk
 import tkinter as tk
 from tkinter import W, E, N, S
 
+
 class AddNotesWindowController:
     def __init__(self, parent, controller):
         self.parent_controller = controller

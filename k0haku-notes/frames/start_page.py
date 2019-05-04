@@ -1,6 +1,8 @@
 from tkinter import ttk
 import tkinter as tk
 
+from frames.add_notes import AddNotesWindow
+
 
 class StartPageController:
     def __init__(self, parent, controller):
@@ -10,8 +12,8 @@ class StartPageController:
         self.view.pack(side='top', fill='both', expand=True)
 
     def open_add_notes(self):
-        from frames.add_notes import AddNotesWindow
         self.parent_controller.view.body.show(AddNotesWindow)
+
 
 class StartPage(tk.Frame):
     def __init__(self, parent):
