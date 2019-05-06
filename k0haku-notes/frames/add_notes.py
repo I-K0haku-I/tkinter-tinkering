@@ -4,9 +4,9 @@ from tkinter import W, E, N, S
 
 
 class AddNotesWindowController:
-    def __init__(self, parent, controller):
+    def __init__(self, view, controller):
         self.parent_controller = controller
-        self.view = AddNotesWindow(parent)
+        self.view = view
 
 
 class AddNotesWindow(tk.Frame):

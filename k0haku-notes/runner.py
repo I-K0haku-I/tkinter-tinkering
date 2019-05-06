@@ -10,10 +10,31 @@ from frames.add_notes import AddNotesWindowController
 
 class NotesAppController:
     def __init__(self, *args, **kwargs):
+        self.controllers = {}
+        
         self.view = NotesAppView(self)
+        self.create_child_controller(StartPageController, self.get_instance_in_frame(StartPage))
+        self.create_child_controller(AddNotesWindowController, self.get_instance_in_frame(AddNotesWindow))
+        self.show(StartPage)
 
         self.view.mainloop()
         self.view.destroy()
+    
+    def get_instance_in_frame(self, View):
+        return self.view.frame.views.get(View)
+
+    def create_child_controller(self, Controller, view):
+        self.controllers[Controller] = Controller(view, self)
+
+    def show(self, View):  # not sure if this should go in FrameHolder or not
+        self.get_instance_in_frame(View).tkraise()
+
+        # frame = getattr(self.controllers.get(View), 'view', None)
+        # if frame is not None:
+        #     frame.destroy()
+        # frame = View(self, self.main_controller)
+        # frame.grid(row=0, column=0, sticky='nsew')
+        # self.frames[View] = frame
 
 
 class NotesAppView(tk.Tk):
@@ -25,10 +46,9 @@ class NotesAppView(tk.Tk):
         self.menubar = NotesAppMenu(self)
         self.config(menu=self.menubar)
 
-        self.body = FrameHolder(self, controller)
-        self.body.add(StartPage)
-        self.body.add(AddNotesWindow)
-        self.body.show(StartPage)
+        self.frame = FrameHolder(self)
+        self.frame.add(StartPage)
+        self.frame.add(AddNotesWindow)
 
 
 class NotesAppMenu(tk.Menu):

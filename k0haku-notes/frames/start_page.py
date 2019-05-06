@@ -5,14 +5,13 @@ from frames.add_notes import AddNotesWindow
 
 
 class StartPageController:
-    def __init__(self, parent, controller):
+    def __init__(self, view, controller):
         self.parent_controller = controller
-        self.view = StartPage(parent)
+        self.view = view
         self.view.button.config(command=lambda: self.open_add_notes())
-        self.view.pack(side='top', fill='both', expand=True)
 
     def open_add_notes(self):
-        self.parent_controller.view.body.show(AddNotesWindow)
+        self.parent_controller.show(AddNotesWindow)
 
 
 class StartPage(tk.Frame):
