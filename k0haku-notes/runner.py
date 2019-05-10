@@ -8,23 +8,45 @@ from frames.start_page import StartPageController
 from frames.add_notes import AddNotesWindowController
 
 
+class TempModel:
+    def __init__(self, parent):
+        self.time = tk.StringVar(parent)
+
+
+# TODO: add logic for saving stuff to files
+def save_to_file(file, text):
+    print('TODO: implement saving text to file')
+
+
 class NotesAppController:
     def __init__(self, *args, **kwargs):
         self.controllers = {}
-        
+        self.file_path = 'test'
+        self.save_callback = save_to_file
+
         self.view = NotesAppView(self)
-        self.create_child_controller(StartPageController, self.get_instance_in_frame(StartPage))
-        self.create_child_controller(AddNotesWindowController, self.get_instance_in_frame(AddNotesWindow))
+        self.model = TempModel(self.view)
+
+        self.add_notes_view = self.get_instance_in_frame(AddNotesWindow)
+        self.add_notes_view.savebtn.config(command=self.save)
+        self.add_notes_view.closebtn.config(command=lambda: self.show(StartPage))
+        self.add_notes_view.time_entry.config(textvariable=self.model.time)
+
+        self.start_page_view = self.get_instance_in_frame(StartPage)
+        self.start_page_view.button.config(command=lambda: self.show(AddNotesWindow))
+
         self.show(StartPage)
 
         self.view.mainloop()
         self.view.destroy()
-    
+
+    def save(self):
+        if self.save_callback:
+            text = self.add_notes_view.content_text.get('1.0', 'end-1c')
+            self.save_callback(self.file_path, text)
+
     def get_instance_in_frame(self, View):
         return self.view.frame.views.get(View)
-
-    def create_child_controller(self, Controller, view):
-        self.controllers[Controller] = Controller(view, self)
 
     def show(self, View):  # not sure if this should go in FrameHolder or not
         self.get_instance_in_frame(View).tkraise()

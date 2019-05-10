@@ -110,6 +110,7 @@ pypi-instructions
 # exclude
 testing.py
 testing2.py
+testing3.py
 calculator.py
 notes
 notes2
