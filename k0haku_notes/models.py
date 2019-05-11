@@ -4,6 +4,7 @@ from base_api_connector import AsDictObject
 
 
 class Model():
+    _tk_var_fields = None
 
     def get_fields(self):
         if not hasattr(self, '_tk_var_fields'):
@@ -16,11 +17,10 @@ class Model():
 
     def as_dict(self):
         return {key: value for key, value in self.get_fields().items()}
-    
+
 
 class IntField():
-
-
+    pass
 
 
 class Notes(Model):

@@ -1,42 +1,10 @@
-from tkinter import ttk
 import tkinter as tk
-from tkinter import W, E, N, S
+from tkinter import ttk
 
-from utils.helpers import AutoScrollbar
-
-
-class AddNotesWindowController:
-    def __init__(self, model, view, close_callback):
-        self.file_path = 'test'  # controller.get_file_path()
-        # self.file = open(self.file_path)
-        # self.note_txt = self.file.read()
-        self.save_callback = save_to_file
-
-        self.model = model
-        self.view = view
-        self.view.savebtn.config(command=self.save)
-        self.view.closebtn.config(command=close_callback)
-        self.view.time_entry.config(textvariable=self.model.time)
-
-    def save(self):
-        if self.save_callback:
-            text = self.view.content_text.get('1.0', 'end-1c')
-            self.save_callback(self.file_path, text)
-
-    def set_save_callback(self, callback):
-        self.save_callback = callback
-
-    def set_close_callback(self, callback):
-        self.close_callback = callback
-
-
-# TODO: add logic for saving stuff to files
-def save_to_file(file, text):
-    print('TODO: implement saving text to file')
+from .widgets import AutoScrollbar
 
 
 class AddNotesWindow(tk.Frame):
-
     def __init__(self, parent):
         super().__init__(parent)
         self.note_txt = ''
@@ -96,10 +64,10 @@ class AddNotesWindow(tk.Frame):
         self.buttons_down.grid_columnconfigure(1, weight=1)
 
         self.savebtn = ttk.Button(self.buttons_down, text='Save')
-        self.savebtn.grid(row=0, column=0, sticky=N+W+E+S)
+        self.savebtn.grid(row=0, column=0, sticky='nswe')
 
         self.closebtn = ttk.Button(self.buttons_down, text='Close')
-        self.closebtn.grid(row=0, column=1, sticky=N+E+W+S)
+        self.closebtn.grid(row=0, column=1, sticky='nswe')
 
         main_frame_id = self.canvas.create_window(0, 0, anchor='nw', window=self.main_frame)
         self.main_frame.update_idletasks()
@@ -109,17 +77,3 @@ class AddNotesWindow(tk.Frame):
             width = event.width
             self.canvas.itemconfigure(main_frame_id, width=width)
         self.canvas.bind('<Configure>', on_canvas_configure)
-
-
-# def main():
-# root = Tk()
-# root.geometry("350x300+300+300")
-# app = AddNotesWindow()
-# app.set_save_callback(print_text)
-
-# top = Toplevel()
-# app2 = AddNotesWindow(master=top)
-# app2.set_save_callback(print_text)
-
-# root.mainloop()
-# root.destroy()

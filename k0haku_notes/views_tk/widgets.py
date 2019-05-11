@@ -33,3 +33,5 @@ class AutoScrollbar(tk.Scrollbar):
 
     def place(self, **kw):
         raise tk.TclError("cannot use place with this widget")
+
+# TODO: add a scrollable frame in here too
