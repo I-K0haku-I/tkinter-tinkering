@@ -7,7 +7,6 @@ from frames import StartPage, AddNotesWindow
 from frames.start_page import StartPageController
 from frames.add_notes import AddNotesWindowController
 
-
 class TempModel:
     def __init__(self, parent):
         self.time = tk.StringVar(parent)
