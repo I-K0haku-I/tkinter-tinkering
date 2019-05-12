@@ -7,6 +7,7 @@ from .widgets import AutoScrollbar
 class AddNotesWindow(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
         self.note_txt = ''
         self.initUI()
 
@@ -29,7 +30,7 @@ class AddNotesWindow(tk.Frame):
         # TIME
         self.time_lbl = ttk.Label(self.main_frame, text='Time:')
         self.time_lbl.pack(side='top', fill='both', expand=True)
-        self.time_entry = ttk.Entry(self.main_frame)
+        self.time_entry = tk.Entry(self.main_frame)  # needs to be tk since ttk doesn't have bg colors...
         self.time_entry.pack(side='top', fill='both', expand=True)
 
         # TYPE
@@ -57,8 +58,9 @@ class AddNotesWindow(tk.Frame):
         self.comment_text.pack(side='top', fill='both', expand=True)
 
         # BUTTONS
-        self.buttons_down = tk.Frame(self.main_frame)
-        self.buttons_down.pack(side='top', fill='both', expand=True)
+        self.buttons_down = tk.Frame(self)
+        self.buttons_down.grid(row=1, column=0, sticky='nsew', columnspan=2)
+        # self.buttons_down.pack(side='top', fill='both', expand=True)
         self.buttons_down.grid_rowconfigure(0, weight=1)
         self.buttons_down.grid_columnconfigure(0, weight=1)
         self.buttons_down.grid_columnconfigure(1, weight=1)

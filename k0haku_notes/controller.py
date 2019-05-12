@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from tkinter import ttk
 
+from models import TempModel
 from views_tk.base import NotesAppView
 from views_tk.note_form import AddNotesWindow
 from views_tk.start_page import StartPage
@@ -9,11 +10,6 @@ from definitions import SUBMENU_COMMANDS
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_NOTES_PATH = ROOT_DIR + '\\data\\notes\\'
-
-
-class TempModel:
-    def __init__(self, parent):
-        self.time = tk.StringVar(parent)
 
 
 # TODO: add logic for saving stuff to files
@@ -28,12 +24,15 @@ class NotesAppController:
         self.save_callback = save_to_file
 
         self.view = NotesAppView(self)
-        self.model = TempModel(self.view)
+        self.model = TempModel(self)
+
+        self.model.timestamp_field = self.get_instance_in_frame(AddNotesWindow).time_entry
 
         self.add_notes_view = self.get_instance_in_frame(AddNotesWindow)
         self.add_notes_view.savebtn.config(command=self.save)
         self.add_notes_view.closebtn.config(command=lambda: self.show(StartPage))
-        self.add_notes_view.time_entry.config(textvariable=self.model.time)
+        self.add_notes_view.time_entry.config(textvariable=self.model.time_string)
+        # TODO: add current date in the variable, maybe do it in model?
 
         self.start_page_view = self.get_instance_in_frame(StartPage)
         self.start_page_view.button.config(command=lambda: self.show(AddNotesWindow))
@@ -43,7 +42,7 @@ class NotesAppController:
             menu.entryconfigure(menu.index(name), command=command)
 
         submenu = self.view.menubar.subsubmenu
-        submenu.entryconfigure(submenu.index('Exit'), command=quit)
+        submenu.entryconfigure(submenu.index('Exit'), command=lambda: self.show(StartPage))
 
         self.show(StartPage)
 
@@ -51,6 +50,8 @@ class NotesAppController:
         self.view.destroy()
 
     def save(self):
+        print(self.model.time_string.get())
+        print(self.model.timestamp)
         if self.save_callback:
             text = self.add_notes_view.content_text.get('1.0', 'end-1c')
             self.save_callback(self.file_path, text)
