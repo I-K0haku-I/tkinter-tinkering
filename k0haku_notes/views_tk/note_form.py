@@ -30,7 +30,8 @@ class AddNotesWindow(tk.Frame):
         # TIME
         self.time_lbl = ttk.Label(self.main_frame, text='Time:')
         self.time_lbl.pack(side='top', fill='both', expand=True)
-        self.time_entry = tk.Entry(self.main_frame)  # needs to be tk since ttk doesn't have bg colors...
+        self.time_var = tk.StringVar(self.main_frame)
+        self.time_entry = tk.Entry(self.main_frame, textvariable=self.time_var)  # needs to be tk since ttk doesn't have bg colors...
         self.time_entry.pack(side='top', fill='both', expand=True)
 
         # TYPE
@@ -82,3 +83,6 @@ class AddNotesWindow(tk.Frame):
     
     def set_time_bg(self, color):
         self.time_entry.config(bg=color)
+    
+    def AddTimeCallback(self, func):
+        self.time_var.trace_add('write', lambda *args: func(self.time_var.get()))

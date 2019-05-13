@@ -3,29 +3,37 @@ from datetime import datetime
 
 from base_api_connector import AsDictObject
 
+class ObservableTest:
+    _callbacks = {}
+    
+    def __init__(self, value):
+        self.data = value
+    
+    def AddCallback(self, callback):
+        self._callbacks[callback] = 1
+
+    def get(self):
+        return self.data
+
+    def set(self, value):
+        self.data = value
+        self._do_callbacks()
+    
+    def _do_callbacks(self):
+        for func in self._callbacks:
+            func(self.data)
+
+    def __str__(self):
+        return self.data
+
 
 # TODO: make it independent of tkinter
 class TempModel:
-    timestamp = datetime.now().timestamp()
+    timestamp = ObservableTest(0)
     timestamp_callback = None
 
     def __init__(self, parent):
         self.parent = parent
-        self.time_string = tk.StringVar(parent.view)
-        self.time_string.set(self.set_string_to_timestamp)
-        self.time_string.trace_add('read', self.set_string_to_timestamp)
-        self.time_string.trace_add('write', self.set_timestamp_to_string)
-
-    def set_string_to_timestamp(self, *args):
-        self.time_string.set(datetime.fromtimestamp(int(self.timestamp)))
-    
-    def set_timestamp_to_string(self, *args):
-        try:
-            self.timestamp = datetime.fromisoformat(self.time_string.get()).timestamp()
-            self.timestamp_callback(is_success=True)
-        except:
-            self.timestamp_callback(is_success=False)
-        
 
 # class Model():
 #     _tk_var_fields = None

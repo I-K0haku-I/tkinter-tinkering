@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 import tkinter as tk
 from tkinter import ttk
 
@@ -29,20 +30,28 @@ class NotesAppController:
 
         self.model = TempModel(self)
 
-        def validate_timestamp_entry(is_success):
-            self.add_notes_view.set_time_bg('white' if is_success else 'red')
-        self.model.timestamp_callback = validate_timestamp_entry
-
         self.add_notes_view.savebtn.config(command=self.save)
-        self.add_notes_view.time_entry.config(textvariable=self.model.time_string)
 
-        # start loop
+        self.add_notes_view.AddTimeCallback(lambda datetime_str: self.set_timestamp(datetime_str))
+        self.model.timestamp.AddCallback(lambda timestamp: self.add_notes_view.time_var.set(datetime.fromtimestamp(timestamp)))
+        time = datetime.today()
+        self.set_timestamp(time)
+
+        # start view loop
         self.view.change_interior_to(StartPage)
         self.view.mainloop()
+    
+    def set_timestamp(self, datetime_string):
+        try:
+            time = datetime.fromisoformat(str(datetime_string)).replace(microsecond=0).timestamp()
+            self.model.timestamp.set(time)
+            self.add_notes_view.set_time_bg('white')
+        except:
+            self.add_notes_view.set_time_bg('red')
 
     def save(self):
-        print(self.model.time_string.get())
-        print(self.model.timestamp)
+        print(self.model.timestamp.get())
+        print(self.add_notes_view.time_var.get())
         if self.save_callback:
             text = self.add_notes_view.content_text.get('1.0', 'end-1c')
             self.save_callback(self.file_path, text)
