@@ -4,10 +4,10 @@ from datetime import datetime
 from base_api_connector import AsDictObject
 
 
+# TODO: make it independent of tkinter
 class TempModel:
     timestamp = datetime.now().timestamp()
-    timestamp_field = None
-    is_convert_failed = False
+    timestamp_callback = None
 
     def __init__(self, parent):
         self.parent = parent
@@ -22,11 +22,9 @@ class TempModel:
     def set_timestamp_to_string(self, *args):
         try:
             self.timestamp = datetime.fromisoformat(self.time_string.get()).timestamp()
-            self.timestamp_field.config(bg='white')
+            self.timestamp_callback(is_success=True)
         except:
-            self.timestamp_field.config(bg='red')
-
-
+            self.timestamp_callback(is_success=False)
         
 
 # class Model():

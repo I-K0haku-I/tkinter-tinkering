@@ -13,12 +13,27 @@ class NotesAppView(tk.Tk):
 
         self.title('Notes')
         self.geometry('640x500')
+        
         self.menubar = NotesAppMenu(self)
+        menu = self.menubar.subsubmenu
+        menu.entryconfigure(menu.index('Exit'), command=lambda: self.change_interior_to(StartPage))
+        menu = self.menubar.submenu
+        for name, command in SUBMENU_COMMANDS.items():
+            menu.entryconfigure(menu.index(name), command=command)
         self.config(menu=self.menubar)
 
+    
         self.frame = FrameHolder(self)
-        self.frame.add(StartPage)
-        self.frame.add(AddNotesWindow)
+        start_page = self.frame.add(StartPage)
+        start_page.button.config(command=lambda: self.change_interior_to(AddNotesWindow))
+        add_notes = self.frame.add(AddNotesWindow)
+        add_notes.closebtn.config(command=lambda: self.change_interior_to(StartPage))
+    
+    def change_interior_to(self, View):
+        self.frame.views.get(View).tkraise()
+    
+    def get_interior(self, View):
+        return self.frame.views.get(View)
         
 
 class NotesAppMenu(tk.Menu):

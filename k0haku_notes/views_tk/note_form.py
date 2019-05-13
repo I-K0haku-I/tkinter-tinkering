@@ -64,7 +64,7 @@ class AddNotesWindow(tk.Frame):
         self.buttons_down.grid_rowconfigure(0, weight=1)
         self.buttons_down.grid_columnconfigure(0, weight=1)
         self.buttons_down.grid_columnconfigure(1, weight=1)
-
+        
         self.savebtn = ttk.Button(self.buttons_down, text='Save')
         self.savebtn.grid(row=0, column=0, sticky='nswe')
 
@@ -79,3 +79,6 @@ class AddNotesWindow(tk.Frame):
             width = event.width
             self.canvas.itemconfigure(main_frame_id, width=width)
         self.canvas.bind('<Configure>', on_canvas_configure)
+    
+    def set_time_bg(self, color):
+        self.time_entry.config(bg=color)

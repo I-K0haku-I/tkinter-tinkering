@@ -15,6 +15,7 @@ class FrameHolder(tk.Frame):
         view = View(self)
         view.grid(row=0, column=0, sticky='nsew')
         self.views[View] = view
+        return view
 
 
 class AutoScrollbar(tk.Scrollbar):
