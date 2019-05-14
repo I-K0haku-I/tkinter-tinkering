@@ -37,6 +37,9 @@ class AddNotesWindow(tk.Frame):
         # TYPE
         self.type_lbl = ttk.Label(self.main_frame, text='Type:')
         self.type_lbl.pack(side='top', fill='both', expand=True)
+        self.type_var = tk.StringVar(self.main_frame)
+        self.type_combobox = ttk.Combobox(self.main_frame, textvariable=self.type_var)
+        self.type_combobox.pack(side='top', fill='both', expand=True)
 
         # TAG
         self.tags_lbl = ttk.Label(self.main_frame, text='Tags:')
@@ -65,7 +68,7 @@ class AddNotesWindow(tk.Frame):
         self.buttons_down.grid_rowconfigure(0, weight=1)
         self.buttons_down.grid_columnconfigure(0, weight=1)
         self.buttons_down.grid_columnconfigure(1, weight=1)
-        
+
         self.savebtn = ttk.Button(self.buttons_down, text='Save')
         self.savebtn.grid(row=0, column=0, sticky='nswe')
 
@@ -80,9 +83,21 @@ class AddNotesWindow(tk.Frame):
             width = event.width
             self.canvas.itemconfigure(main_frame_id, width=width)
         self.canvas.bind('<Configure>', on_canvas_configure)
-    
+
     def set_time_bg(self, color):
         self.time_entry.config(bg=color)
-    
-    def AddTimeCallback(self, func):
+
+    def add_time_callback(self, func):
         self.time_var.trace_add('write', lambda *args: func(self.time_var.get()))
+
+    def set_time(self, time_str):
+        self.time_var.set(time_str)
+
+    def add_save_command(self, command):
+        self.savebtn.config(command=command)
+
+    def set_types_list(self, types):
+        self.type_combobox['values'] = types
+
+    def add_callback_type_create(self, func):
+        self.type_combobox.bind('<Return>', lambda e: func(self.type_combobox.get()))

@@ -3,13 +3,15 @@ from datetime import datetime
 
 from base_api_connector import AsDictObject
 
-class ObservableTest:
-    _callbacks = {}
+class ObservableVar:
+    _callbacks = None  # can't initiate dict here because it will be the same for all ObservableVar instances for some reason
     
-    def __init__(self, value):
-        self.data = value
+    def __init__(self, start_val=0, identity=None):
+        self._callbacks = {} 
+        self.identity = identity
+        self.data = start_val
     
-    def AddCallback(self, callback):
+    def add_callback(self, callback):
         self._callbacks[callback] = 1
 
     def get(self):
@@ -29,11 +31,16 @@ class ObservableTest:
 
 # TODO: make it independent of tkinter
 class TempModel:
-    timestamp = ObservableTest(0)
-    timestamp_callback = None
+    timestamp = None
+    selected_type = None
+    types_list = None
 
     def __init__(self, parent):
+        self.timestamp = ObservableVar(0, 'timestamp')
+        self.selected_type = ObservableVar('', 'selected_type')
+        self.types_list = ObservableVar([], 'types')
         self.parent = parent
+
 
 # class Model():
 #     _tk_var_fields = None

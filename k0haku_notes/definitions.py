@@ -12,6 +12,7 @@ def create_popup(title='Popup', msg='', buttons=('OK',)):
         B1.pack()
 
 
+# This feels like a bad idea, I think I should just write out the menu in the menu
 SUBMENU_COMMANDS = {
     'Add file...': lambda: create_popup(),
     'Settings': lambda: print('lul'),

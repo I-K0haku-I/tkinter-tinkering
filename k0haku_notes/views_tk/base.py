@@ -4,12 +4,13 @@ from .widgets import FrameHolder
 
 from .note_form import AddNotesWindow
 from .start_page import StartPage
-from definitions import SUBMENU_COMMANDS
 
 
 class NotesAppView(tk.Tk):
     def __init__(self, controller, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.controller = controller
 
         self.title('Notes')
         self.geometry('640x500')
@@ -18,17 +19,17 @@ class NotesAppView(tk.Tk):
         menu = self.menubar.subsubmenu
         menu.entryconfigure(menu.index('Exit'), command=lambda: self.change_interior_to(StartPage))
         menu = self.menubar.submenu
-        for name, command in SUBMENU_COMMANDS.items():
+        for name, command in controller.SUBMENU_COMMANDS.items():
             menu.entryconfigure(menu.index(name), command=command)
         self.config(menu=self.menubar)
-
     
         self.frame = FrameHolder(self)
         start_page = self.frame.add(StartPage)
-        start_page.button.config(command=lambda: self.change_interior_to(AddNotesWindow))
         add_notes = self.frame.add(AddNotesWindow)
+
+        start_page.button.config(command=lambda: self.change_interior_to(AddNotesWindow))
         add_notes.closebtn.config(command=lambda: self.change_interior_to(StartPage))
-    
+
     def change_interior_to(self, View):
         self.frame.views.get(View).tkraise()
     
@@ -37,11 +38,12 @@ class NotesAppView(tk.Tk):
         
 
 class NotesAppMenu(tk.Menu):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        controller = parent.controller
+        super().__init__(parent, *args, **kwargs)
 
         self.submenu = tk.Menu(self, tearoff=0)
-        for name in SUBMENU_COMMANDS.keys():
+        for name in controller.SUBMENU_COMMANDS.keys():
             self.submenu.add_command(label=name)
         self.submenu.insert_separator(2)
 

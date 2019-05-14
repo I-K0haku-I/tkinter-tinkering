@@ -19,28 +19,44 @@ def save_to_file(file, text):
 
 
 class NotesAppController:
+    SUBMENU_COMMANDS = SUBMENU_COMMANDS
+
     def __init__(self, *args, **kwargs):
         self.controllers = {}
         self.file_path = 'test'
         self.save_callback = save_to_file
 
         self.view = NotesAppView(self)
-        self.add_notes_view = self.view.get_interior(AddNotesWindow)
-        self.start_page_view = self.view.get_interior(StartPage)
-
         self.model = TempModel(self)
 
-        self.add_notes_view.savebtn.config(command=self.save)
+        # VIEW: START PAGE
+        self.start_page_view = self.view.get_interior(StartPage)
 
-        self.add_notes_view.AddTimeCallback(lambda datetime_str: self.set_timestamp(datetime_str))
-        self.model.timestamp.AddCallback(lambda timestamp: self.add_notes_view.time_var.set(datetime.fromtimestamp(timestamp)))
-        time = datetime.today()
-        self.set_timestamp(time)
+        # VIEW: ADD NOTES
+        self.add_notes_view = self.view.get_interior(AddNotesWindow)
+        self.add_notes_view.add_save_command(self.save)
+        # change model state when view changes
+        self.add_notes_view.add_time_callback(lambda datetime_str: self.set_timestamp(datetime_str))
+        def update_view_state(timestamp):
+            return self.add_notes_view.set_time(datetime.fromtimestamp(timestamp))
+        self.model.timestamp.add_callback(update_view_state)
+        
+        # self.add_notes_view.add_type_callback(lambda type:)
+        self.model.types_list.add_callback(lambda types: self.add_notes_view.set_types_list(types))
+        self.add_notes_view.add_callback_type_create(self.create_type)
 
-        # start view loop
+        # START view loop
+        self.set_timestamp(datetime.today())
+        self.model.types_list.set(['test','test2'])
         self.view.change_interior_to(StartPage)
         self.view.mainloop()
-    
+
+    def create_type(self, new_type):
+        if new_type in self.model.types_list.get():
+            return
+        self.model.types_list.set(self.model.types_list.get() + [new_type])
+        self.model.selected_type.set(new_type)
+
     def set_timestamp(self, datetime_string):
         try:
             time = datetime.fromisoformat(str(datetime_string)).replace(microsecond=0).timestamp()
@@ -52,6 +68,7 @@ class NotesAppController:
     def save(self):
         print(self.model.timestamp.get())
         print(self.add_notes_view.time_var.get())
+        print(self.model.selected_type.get())
         if self.save_callback:
             text = self.add_notes_view.content_text.get('1.0', 'end-1c')
             self.save_callback(self.file_path, text)
