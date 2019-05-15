@@ -29,25 +29,34 @@ class NotesAppController:
         self.view = NotesAppView(self)
         self.model = TempModel(self)
 
+        timestamp_var = self.model.timestamp
+        types_list = self.model.types_list
+
         # VIEW: START PAGE
-        self.start_page_view = self.view.get_interior(StartPage)
+        start_page: StartPage = self.view.get_interior(StartPage)
 
         # VIEW: ADD NOTES
-        self.add_notes_view = self.view.get_interior(AddNotesWindow)
-        self.add_notes_view.add_save_command(self.save)
-        # change model state when view changes
-        self.add_notes_view.add_time_callback(lambda datetime_str: self.set_timestamp(datetime_str))
+        # TODO: create a class for note_form that takes the AddNotesWindow instance
+        note_form: AddNotesWindow = self.view.get_interior(AddNotesWindow)
+        note_form.add_save_command(self.save)
+        def update_model(datetime_str):
+            return self.set_timestamp(datetime_str)
         def update_view_state(timestamp):
-            return self.add_notes_view.set_time(datetime.fromtimestamp(timestamp))
-        self.model.timestamp.add_callback(update_view_state)
-        
-        # self.add_notes_view.add_type_callback(lambda type:)
-        self.model.types_list.add_callback(lambda types: self.add_notes_view.set_types_list(types))
-        self.add_notes_view.add_callback_type_create(self.create_type)
+            return note_form.set_time(datetime.fromtimestamp(timestamp))
+        note_form.add_time_callback(update_model)
+        timestamp_var.add_callback(update_view_state)
 
+        # note_form.add_type_callback(lambda type:)
+        def update_view_state(types):
+            return note_form.set_types_list(types)
+        types_list.add_callback(update_view_state)
+        note_form.add_callback_type_create(self.create_type)
+
+        self.start_page = start_page
+        self.note_form = note_form
         # START view loop
         self.set_timestamp(datetime.today())
-        self.model.types_list.set(['test','test2'])
+        types_list.set(['test','test2'])
         self.view.change_interior_to(StartPage)
         self.view.mainloop()
 
@@ -61,16 +70,16 @@ class NotesAppController:
         try:
             time = datetime.fromisoformat(str(datetime_string)).replace(microsecond=0).timestamp()
             self.model.timestamp.set(time)
-            self.add_notes_view.set_time_bg('white')
+            self.note_form.set_time_bg('white')
         except:
-            self.add_notes_view.set_time_bg('red')
+            self.note_form.set_time_bg('red')
 
     def save(self):
         print(self.model.timestamp.get())
-        print(self.add_notes_view.time_var.get())
+        print(self.note_form.time_var.get())
         print(self.model.selected_type.get())
         if self.save_callback:
-            text = self.add_notes_view.content_text.get('1.0', 'end-1c')
+            text = self.note_form.content_text.get('1.0', 'end-1c')
             self.save_callback(self.file_path, text)
 
     def show(self, View):  # not sure if this should go in FrameHolder or not
