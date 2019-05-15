@@ -36,39 +36,49 @@ class NotesAppController:
         start_page: StartPage = self.view.get_interior(StartPage)
 
         # VIEW: ADD NOTES
-        # TODO: create a class for note_form that takes the AddNotesWindow instance
         note_form: AddNotesWindow = self.view.get_interior(AddNotesWindow)
         note_form.add_save_command(self.save)
-        def update_model(datetime_str):
-            return self.set_timestamp(datetime_str)
-        def update_view_state(timestamp):
-            return note_form.set_time(datetime.fromtimestamp(timestamp))
-        note_form.add_time_callback(update_model)
-        timestamp_var.add_callback(update_view_state)
-
-        # note_form.add_type_callback(lambda type:)
-        def update_view_state(types):
-            return note_form.set_types_list(types)
-        types_list.add_callback(update_view_state)
         note_form.add_callback_type_create(self.create_type)
+        note_form.add_callback_type_select(self.select_type)
+        note_form.add_time_callback(self.update_timestamp)
+
+        timestamp_var = self.model.timestamp
+        timestamp_var.add_callback(self.update_view_time)
+
+        types_list = self.model.types_list
+        types_list.add_callback(self.update_view_type_list)
+    
 
         self.start_page = start_page
         self.note_form = note_form
+
         # START view loop
         self.set_timestamp(datetime.today())
         types_list.set(['test','test2'])
         self.view.change_interior_to(StartPage)
         self.view.mainloop()
+    
+    def update_timestamp(self, datetime_str):
+        return self.set_timestamp(datetime_str)
+    
+    def update_view_time(self, timestamp):
+        return self.note_form.set_time(datetime.fromtimestamp(timestamp))
+
+    def update_view_type_list(self, types):
+        return self.note_form.set_types_list(types)
+
+    def select_type(self, new_type):
+        self.model.selected_type.set(new_type)
 
     def create_type(self, new_type):
         if new_type in self.model.types_list.get():
             return
-        self.model.types_list.set(self.model.types_list.get() + [new_type])
-        self.model.selected_type.set(new_type)
+        self.model.types_list.append(new_type)
+        self.select_type(new_type)
 
     def set_timestamp(self, datetime_string):
         try:
-            time = datetime.fromisoformat(str(datetime_string)).replace(microsecond=0).timestamp()
+            time = self.model.convert_to_timestamp(datetime_string)
             self.model.timestamp.set(time)
             self.note_form.set_time_bg('white')
         except:

@@ -101,3 +101,6 @@ class AddNotesWindow(tk.Frame):
 
     def add_callback_type_create(self, func):
         self.type_combobox.bind('<Return>', lambda e: func(self.type_combobox.get()))
+    
+    def add_callback_type_select(self, func):
+        self.type_combobox.bind('<<ComboboxSelected>>', lambda e: func(self.type_combobox.get()))

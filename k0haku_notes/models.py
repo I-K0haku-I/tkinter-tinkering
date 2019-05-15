@@ -29,6 +29,16 @@ class ObservableVar:
         return self.data
 
 
+class ListObservableVar(ObservableVar):
+    def __init__(self, start_val=[], identity=None):
+        if not isinstance(start_val, list):
+            raise TypeError('Has to be a list.')
+        super().__init__(start_val, identity)
+
+    def append(self, value):
+        self.data.append(value)
+
+
 # TODO: make it independent of tkinter
 class TempModel:
     timestamp = None
@@ -38,9 +48,11 @@ class TempModel:
     def __init__(self, parent):
         self.timestamp = ObservableVar(0, 'timestamp')
         self.selected_type = ObservableVar('', 'selected_type')
-        self.types_list = ObservableVar([], 'types')
+        self.types_list = ListObservableVar([], 'types')
         self.parent = parent
 
+    def convert_to_timestamp(self, datetime_string):
+        return datetime.fromisoformat(str(datetime_string)).replace(microsecond=0).timestamp()
 
 # class Model():
 #     _tk_var_fields = None
