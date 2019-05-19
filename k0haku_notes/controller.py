@@ -47,6 +47,8 @@ class NotesAppController:
 
         types_list = self.model.types_list
         types_list.add_callback(self.update_view_type_list)
+
+        # TODO: finally do tap dropdown here...
     
 
         self.start_page = start_page

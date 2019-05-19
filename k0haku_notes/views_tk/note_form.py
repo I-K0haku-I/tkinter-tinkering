@@ -27,6 +27,7 @@ class AddNotesWindow(tk.Frame):
         self.main_frame = tk.Frame(self.canvas)
         self.main_frame.pack(side='top', fill='both', expand=True)
 
+        # TODO: create specialized classes for time field, type dropdown, tag dropdown etc.
         # TIME
         self.time_lbl = ttk.Label(self.main_frame, text='Time:')
         self.time_lbl.pack(side='top', fill='both', expand=True)
