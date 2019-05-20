@@ -37,11 +37,13 @@ class NotesAppController:
 
         # VIEW: ADD NOTES
         note_form: AddNotesWindow = self.view.get_interior(AddNotesWindow)
-        note_form.add_save_command(self.save)
         note_form.add_time_callback(self.update_timestamp)
         note_form.add_callback_type_create(self.create_type)
         note_form.add_callback_type_select(self.select_type)
         note_form.add_callback_tags_select(self.select_tags)
+        note_form.add_callback_content_select(self.select_content)
+        note_form.add_callback_comment_select(self.select_comment)
+        note_form.add_save_command(self.save)
 
         timestamp_var = self.model.timestamp
         timestamp_var.add_callback(self.update_view_time)
@@ -83,6 +85,12 @@ class NotesAppController:
         new_tags_list = [tag.strip() for tag in new_tags.split()]
         self.model.selected_tags_list.set(new_tags_list)
 
+    def select_content(self, new_content):
+        self.model.content.set(new_content)
+
+    def select_comment(self, new_comment):
+        self.model.comment.set(new_comment)
+
     def set_timestamp(self, datetime_string):
         try:
             time = self.model.convert_to_timestamp(datetime_string)
@@ -92,9 +100,10 @@ class NotesAppController:
             self.note_form.set_time_bg('red')
 
     def save(self):
-        print(self.model.timestamp.get())
-        print(self.note_form.time_var.get())
-        print(self.model.selected_type.get())
+        # print(self.model.timestamp.get())
+        # print(self.note_form.time_var.get())
+        # print(self.model.selected_type.get())
+        print(self.model)  # TODO: test this
         if self.save_callback:
             text = self.note_form.content_text.get('1.0', 'end-1c')
             self.save_callback(self.file_path, text)

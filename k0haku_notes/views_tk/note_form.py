@@ -53,7 +53,8 @@ class AddNotesWindow(tk.Frame):
         self.content_lbl = ttk.Label(self.main_frame, text='Content:')
         self.content_lbl.pack(side='top', fill='both', expand=True)
 
-        self.content_text = tk.Text(self.main_frame)
+        self.content_var = tk.StringVar(self.main_frame)
+        self.content_text = tk.Text(self.main_frame, textvariable=self.content_var)
         self.content_text.insert('1.0', self.note_txt)
         self.content_text.pack(side='top', fill='both', expand=True)
 
@@ -61,7 +62,8 @@ class AddNotesWindow(tk.Frame):
         self.comment_lbl = ttk.Label(self.main_frame, text='Comment:')
         self.comment_lbl.pack(side='top', fill='both', expand=True)
 
-        self.comment_text = tk.Text(self.main_frame)
+        self.comment_var = tk.StringVar(self.main_frame)
+        self.comment_text = tk.Text(self.main_frame, textvariable=self.comment_var)
         self.comment_text.insert('1.0', self.note_txt)
         self.comment_text.pack(side='top', fill='both', expand=True)
 

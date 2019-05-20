@@ -45,16 +45,23 @@ class TempModel:
     selected_type = None
     types_list = None
     selected_tags_list = None
+    content = None
+    comment = None
 
     def __init__(self, parent):
         self.timestamp = ObservableVar(0, 'timestamp')
-        self.selected_type = ObservableVar('', 'selected_type')
         self.types_list = ListObservableVar([], 'types')
+        self.selected_type = ObservableVar('', 'selected_type')
         self.selected_tags_list = ListObservableVar([], 'selected_tags_list')
+        self.content = ObservableVar([], 'content')
+        self.comment = ObservableVar([], 'comment')
         self.parent = parent
 
     def convert_to_timestamp(self, datetime_string):
         return datetime.fromisoformat(str(datetime_string)).replace(microsecond=0).timestamp()
+
+    def __repr__(self):
+        return f"{self.timestamp}, {self.selected_type}, {self.selected_tags_list}, {self.content}, {self.comment}"
 
 # class Model():
 #     _tk_var_fields = None
