@@ -44,11 +44,13 @@ class TempModel:
     timestamp = None
     selected_type = None
     types_list = None
+    selected_tags_list = None
 
     def __init__(self, parent):
         self.timestamp = ObservableVar(0, 'timestamp')
         self.selected_type = ObservableVar('', 'selected_type')
         self.types_list = ListObservableVar([], 'types')
+        self.selected_tags_list = ListObservableVar([], 'selected_tags_list')
         self.parent = parent
 
     def convert_to_timestamp(self, datetime_string):

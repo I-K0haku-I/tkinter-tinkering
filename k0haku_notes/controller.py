@@ -38,9 +38,10 @@ class NotesAppController:
         # VIEW: ADD NOTES
         note_form: AddNotesWindow = self.view.get_interior(AddNotesWindow)
         note_form.add_save_command(self.save)
+        note_form.add_time_callback(self.update_timestamp)
         note_form.add_callback_type_create(self.create_type)
         note_form.add_callback_type_select(self.select_type)
-        note_form.add_time_callback(self.update_timestamp)
+        note_form.add_callback_tags_select(self.select_tags)
 
         timestamp_var = self.model.timestamp
         timestamp_var.add_callback(self.update_view_time)
@@ -48,7 +49,7 @@ class NotesAppController:
         types_list = self.model.types_list
         types_list.add_callback(self.update_view_type_list)
 
-        # TODO: finally do tap dropdown here...
+        tags_list = self.model.selected_tags_list
     
 
         self.start_page = start_page
@@ -77,6 +78,10 @@ class NotesAppController:
             return
         self.model.types_list.append(new_type)
         self.select_type(new_type)
+
+    def select_tags(self, new_tags: str):
+        new_tags_list = [tag.strip() for tag in new_tags.split()]
+        self.model.selected_tags_list.set(new_tags_list)
 
     def set_timestamp(self, datetime_string):
         try:

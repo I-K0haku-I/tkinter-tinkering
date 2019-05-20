@@ -45,6 +45,9 @@ class AddNotesWindow(tk.Frame):
         # TAG
         self.tags_lbl = ttk.Label(self.main_frame, text='Tags:')
         self.tags_lbl.pack(side='top', fill='both', expand=True)
+        self.tags_var = tk.StringVar(self.main_frame)
+        self.tags_entry = ttk.Entry(self.main_frame, textvariable=self.tags_var)
+        self.tags_entry.pack(side='top', fill='both', expand=True)
 
         # CONTENT
         self.content_lbl = ttk.Label(self.main_frame, text='Content:')
@@ -101,7 +104,15 @@ class AddNotesWindow(tk.Frame):
         self.type_combobox['values'] = types
 
     def add_callback_type_create(self, func):
-        self.type_combobox.bind('<Return>', lambda e: func(self.type_combobox.get()))
+        pass
+        # TODO: maybe don't create, only when saving
+        # self.type_combobox.bind('<FocusOut>', lambda e: func(self.type_combobox.get()))
+        # self.type_combobox.bind('<Return>', lambda e: func(self.type_combobox.get()))
     
     def add_callback_type_select(self, func):
+        self.type_combobox.bind('<FocusOut>', lambda e: func(self.type_combobox.get()))
         self.type_combobox.bind('<<ComboboxSelected>>', lambda e: func(self.type_combobox.get()))
+    
+    def add_callback_tags_select(self, func):
+        self.tags_entry.bind('<FocusOut>', lambda e: func(self.tags_entry.get()))
+        self.tags_entry.bind('<Return>', lambda e: func(self.tags_entry.get()))
