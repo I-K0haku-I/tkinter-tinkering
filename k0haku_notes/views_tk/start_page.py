@@ -8,5 +8,8 @@ class StartPage(tk.Frame):
         label = ttk.Label(self, text='Hello World')
         label.pack(pady=10, padx=10)
 
-        self.button = ttk.Button(self, text='ACTUALLY Start App')
+        self.button = ttk.Button(self, text='Add Note')
         self.button.pack()
+
+        self.button2 = ttk.Button(self, text='Day Overview')
+        self.button2.pack()

@@ -26,7 +26,7 @@ class ObservableVar:
             func(self.data)
 
     def __str__(self):
-        return self.data
+        return str(self.data)
 
 
 class ListObservableVar(ObservableVar):
@@ -39,7 +39,6 @@ class ListObservableVar(ObservableVar):
         self.data.append(value)
 
 
-# TODO: make it independent of tkinter
 class TempModel:
     timestamp = None
     selected_type = None
@@ -48,20 +47,21 @@ class TempModel:
     content = None
     comment = None
 
-    def __init__(self, parent):
+    def __init__(self):
         self.timestamp = ObservableVar(0, 'timestamp')
         self.types_list = ListObservableVar([], 'types')
         self.selected_type = ObservableVar('', 'selected_type')
         self.selected_tags_list = ListObservableVar([], 'selected_tags_list')
-        self.content = ObservableVar([], 'content')
-        self.comment = ObservableVar([], 'comment')
-        self.parent = parent
+        self.content = ObservableVar('', 'content')
+        self.comment = ObservableVar('', 'comment')
 
     def convert_to_timestamp(self, datetime_string):
         return datetime.fromisoformat(str(datetime_string)).replace(microsecond=0).timestamp()
 
     def __repr__(self):
-        return f"{self.timestamp}, {self.selected_type}, {self.selected_tags_list}, {self.content}, {self.comment}"
+        return (f"{self.timestamp}, {self.selected_type}"
+                f", {self.selected_tags_list}, {self.content}"
+                f", {self.comment}")
 
 # class Model():
 #     _tk_var_fields = None

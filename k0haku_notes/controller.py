@@ -5,63 +5,56 @@ from tkinter import ttk
 
 from models import TempModel
 from views_tk.base import NotesAppView
-from views_tk.note_form import AddNotesWindow
+from views_tk.note_form import AddNotesView
 from views_tk.start_page import StartPage
+from views_tk.day_overview import DayOverview
 from definitions import SUBMENU_COMMANDS
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_NOTES_PATH = ROOT_DIR + '\\data\\notes\\'
 
 
-# TODO: add logic for saving stuff to files
-def save_to_file(file, text):
-    print('TODO: implement saving text to file')
-
-
 class NotesAppController:
     SUBMENU_COMMANDS = SUBMENU_COMMANDS
 
     def __init__(self, *args, **kwargs):
-        self.controllers = {}
-        self.file_path = 'test'
-        self.save_callback = save_to_file
-
         self.view = NotesAppView(self)
-        self.model = TempModel(self)
-
-        timestamp_var = self.model.timestamp
-        types_list = self.model.types_list
+        self.model = TempModel()
 
         # VIEW: START PAGE
         start_page: StartPage = self.view.get_interior(StartPage)
 
         # VIEW: ADD NOTES
-        note_form: AddNotesWindow = self.view.get_interior(AddNotesWindow)
+        note_form: AddNotesView = self.view.get_interior(AddNotesView)
         note_form.add_time_callback(self.update_timestamp)
+        # TODO: add suggestions to type
         note_form.add_callback_type_create(self.create_type)
         note_form.add_callback_type_select(self.select_type)
         note_form.add_callback_tags_select(self.select_tags)
-        note_form.add_callback_content_select(self.select_content)
-        note_form.add_callback_comment_select(self.select_comment)
+        note_form.add_content_callback(self.select_content)
+        note_form.add_comment_callback(self.select_comment)
         note_form.add_save_command(self.save)
 
         timestamp_var = self.model.timestamp
         timestamp_var.add_callback(self.update_view_time)
 
-        types_list = self.model.types_list
-        types_list.add_callback(self.update_view_type_list)
+        types_list_var = self.model.types_list
+        types_list_var.add_callback(self.update_view_type_list)
 
         tags_list = self.model.selected_tags_list
-    
 
         self.start_page = start_page
         self.note_form = note_form
 
         # START view loop
         self.set_timestamp(datetime.today())
-        types_list.set(['test','test2'])
+        types_list_var.set(['test','test2'])
         self.view.change_interior_to(StartPage)
-        self.view.mainloop()
+
+        # remove, just for testing
+        # self.view.change_interior_to(DayOverview)
+
+        self.view.start()
     
     def update_timestamp(self, datetime_str):
         return self.set_timestamp(datetime_str)
@@ -82,7 +75,7 @@ class NotesAppController:
         self.select_type(new_type)
 
     def select_tags(self, new_tags: str):
-        new_tags_list = [tag.strip() for tag in new_tags.split()]
+        new_tags_list = [tag.strip() for tag in new_tags.split(',')]
         self.model.selected_tags_list.set(new_tags_list)
 
     def select_content(self, new_content):
@@ -104,9 +97,6 @@ class NotesAppController:
         # print(self.note_form.time_var.get())
         # print(self.model.selected_type.get())
         print(self.model)  # TODO: test this
-        if self.save_callback:
-            text = self.note_form.content_text.get('1.0', 'end-1c')
-            self.save_callback(self.file_path, text)
 
     def show(self, View):  # not sure if this should go in FrameHolder or not
         self.view.change_interior_to(View)

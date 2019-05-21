@@ -1,3 +1,3 @@
-from .note_form import AddNotesWindow
+from .note_form import AddNotesView
 from .start_page import StartPage
 from .base import NotesAppView
