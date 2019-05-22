@@ -15,6 +15,12 @@ class AddNotesController:
         """func 
         """
         self.model.timestamp.add_callback(func)
+    
+    def subscribe_to_selected_type(self, func):
+        self.model.selected_type.add_callback(func)
+    
+    def subscribe_to_type_list(self, func):
+        self.model.types_list.add_callback(func)
 
     def load_note(self, id):
         self.model
@@ -33,6 +39,14 @@ class AddNotesController:
         except:
             return False
 
+    def set_selected_type(self, type_string):
+        self.model.selected_type.set(type_string)
+        # TODO: could send back whether type already exists or not
+    
+    def init_values(self):
+        self.set_timestamp(datetime.today())
+        self.model.types_list.set(['test','test2'])
+
 class AddNotesView(tk.Frame):
     def __init__(self, parent, root_controller, id=None):
         super().__init__(parent)
@@ -41,10 +55,10 @@ class AddNotesView(tk.Frame):
         if id:
             self.controller.load_note(id)
         self.note_txt = ''
-        self.initUI()
-        self.controller.set_timestamp(datetime.today())
+        self.init_ui()
+        self.controller.init_values()
 
-    def initUI(self):
+    def init_ui(self):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
@@ -66,18 +80,27 @@ class AddNotesView(tk.Frame):
         self.time_lbl.pack(side='top', fill='both', expand=True)
         self.time_var = tk.StringVar(self.main_frame)
         self.time_var.trace_add('write', lambda *args: self.on_time_var_change())
-        self.controller.subscribe_to_timestamp(lambda timestamp: self.time_var.set(datetime.fromtimestamp(timestamp)))
+        self.controller.subscribe_to_timestamp(
+            # TODO: maybe create a sub ufnction that delivers the converted daytime isntead of defining it here
+            # basically, just make it so you can give in "lambda time: self.time_var.set(time)"
+            lambda timestamp: self.time_var.set(str(datetime.fromtimestamp(timestamp))[:-3])
+        )
         self.time_entry = tk.Entry(self.main_frame, textvariable=self.time_var)  # needs to be tk since ttk doesn't have bg colors...
         self.time_entry.pack(side='top', fill='both', expand=True)
 
-        # TODO: hook up the below stuff too like above
         # TYPE
         self.type_lbl = ttk.Label(self.main_frame, text='Type:')
         self.type_lbl.pack(side='top', fill='both', expand=True)
         self.type_var = tk.StringVar(self.main_frame)
+        self.type_var.trace_add('write', lambda *args: self.on_type_var_change())
+        self.controller.subscribe_to_selected_type(lambda new_type: self.type_var.set(new_type))
         self.type_combobox = ttk.Combobox(self.main_frame, textvariable=self.type_var)
+        def set_values(values):  # can't do assignmnents in lambadas so have to do this...
+            self.type_combobox['values'] = values
+        self.controller.subscribe_to_type_list(set_values)
         self.type_combobox.pack(side='top', fill='both', expand=True)
 
+        # TODO: hook up the below stuff too like above
         # TAG
         self.tags_lbl = ttk.Label(self.main_frame, text='Tags:')
         self.tags_lbl.pack(side='top', fill='both', expand=True)
@@ -86,6 +109,7 @@ class AddNotesView(tk.Frame):
         self.tags_entry.pack(side='top', fill='both', expand=True)
 
         # CONTENT
+        # TODO: think about putting this at the top or highlighting it or make it easier to click into or something
         self.content_lbl = ttk.Label(self.main_frame, text='Content:')
         self.content_lbl.pack(side='top', fill='both', expand=True)
 
@@ -99,7 +123,7 @@ class AddNotesView(tk.Frame):
 
         # TODO: Scrollbar here in case of lots of text?
         self.comment_var = tk.StringVar(self.main_frame)
-        self.comment_text = tk.Text(self.main_frame, height=8)
+        self.comment_text = tk.Text(self.main_frame, height=20)
         self.comment_text.bind('<KeyRelease>', lambda e: self.comment_var.set(e.widget.get('1.0', 'end-1c')))
         self.comment_text.insert('1.0', self.note_txt)
         self.comment_text.pack(side='top', fill='both', expand=True)
@@ -138,11 +162,8 @@ class AddNotesView(tk.Frame):
         else:
             self.time_entry.config(bg='red')
 
-    def set_time_bg(self, color):
-        self.time_entry.config(bg=color)
-
-    def add_time_callback(self, func):
-        self.time_var.trace_add('write', lambda *args: func(self.time_var.get()))
+    def on_type_var_change(self):
+        self.controller.set_selected_type(self.type_var.get())
 
     def set_time(self, time_str):
         self.time_var.set(time_str)

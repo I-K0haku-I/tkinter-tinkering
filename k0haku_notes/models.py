@@ -56,7 +56,7 @@ class TempModel:
         self.comment = ObservableVar('', 'comment')
 
     def convert_to_timestamp(self, datetime_string):
-        return datetime.fromisoformat(str(datetime_string)).replace(microsecond=0).timestamp()
+        return datetime.fromisoformat(str(datetime_string)).replace(microsecond=0, second=0).timestamp()
 
     def __repr__(self):
         return (f"{self.timestamp}, {self.selected_type}"
