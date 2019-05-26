@@ -12,8 +12,6 @@ class AddNotesController:
         self.model = TempModel()
 
     def subscribe_to_timestamp(self, func):
-        """func 
-        """
         self.model.timestamp.add_callback(func)
     
     def subscribe_to_selected_type(self, func):
@@ -21,6 +19,17 @@ class AddNotesController:
     
     def subscribe_to_type_list(self, func):
         self.model.types_list.add_callback(func)
+    
+    def subscribe_to_tags(self, func):
+        def func_as_str(tags_list):
+            func(','.join(tags_list))
+        self.model.selected_tags_list.add_callback(func_as_str)
+    
+    def subscribe_to_content(self, func):
+        self.model.content.add_callback(func)
+    
+    def subscribe_to_comment(self, func):
+        self.model.comment.add_callback(func)
 
     def load_note(self, id):
         self.model
@@ -41,12 +50,23 @@ class AddNotesController:
 
     def set_selected_type(self, type_string):
         self.model.selected_type.set(type_string)
-        # TODO: could send back whether type already exists or not
+        # TODO: could send back whether type already exists or not and then display it
     
+    def set_tags(self, tags_str):
+        new_tags_list = [tag.strip() for tag in tags_str.split(',')]
+        self.model.selected_tags_list.set(new_tags_list)
+
+    def set_content(self, content_str):
+        self.model.content.set(content_str)
+
+    def set_comment(self, comment_str):
+        self.model.comment.set(comment_str)
+
     def init_values(self):
         self.set_timestamp(datetime.today())
         self.model.types_list.set(['test','test2'])
 
+        
 class AddNotesView(tk.Frame):
     def __init__(self, parent, root_controller, id=None):
         super().__init__(parent)
@@ -74,59 +94,13 @@ class AddNotesView(tk.Frame):
         self.main_frame = tk.Frame(self.canvas)
         self.main_frame.pack(side='top', fill='both', expand=True)
 
-        # TODO: create specialized classes for time field, type dropdown, tag dropdown etc.
-        # TIME
-        self.time_lbl = ttk.Label(self.main_frame, text='Time:')
-        self.time_lbl.pack(side='top', fill='both', expand=True)
-        self.time_var = tk.StringVar(self.main_frame)
-        self.time_var.trace_add('write', lambda *args: self.on_time_var_change())
-        self.controller.subscribe_to_timestamp(
-            # TODO: maybe create a sub ufnction that delivers the converted daytime isntead of defining it here
-            # basically, just make it so you can give in "lambda time: self.time_var.set(time)"
-            lambda timestamp: self.time_var.set(str(datetime.fromtimestamp(timestamp))[:-3])
-        )
-        self.time_entry = tk.Entry(self.main_frame, textvariable=self.time_var)  # needs to be tk since ttk doesn't have bg colors...
-        self.time_entry.pack(side='top', fill='both', expand=True)
-
-        # TYPE
-        self.type_lbl = ttk.Label(self.main_frame, text='Type:')
-        self.type_lbl.pack(side='top', fill='both', expand=True)
-        self.type_var = tk.StringVar(self.main_frame)
-        self.type_var.trace_add('write', lambda *args: self.on_type_var_change())
-        self.controller.subscribe_to_selected_type(lambda new_type: self.type_var.set(new_type))
-        self.type_combobox = ttk.Combobox(self.main_frame, textvariable=self.type_var)
-        def set_values(values):  # can't do assignmnents in lambadas so have to do this...
-            self.type_combobox['values'] = values
-        self.controller.subscribe_to_type_list(set_values)
-        self.type_combobox.pack(side='top', fill='both', expand=True)
-
+        self.time_lbl, self.time_var, self.time_entry = self.create_time(self.main_frame)
+        self.type_lbl, self.type_var, self.type_combobox = self.create_type(self.main_frame)
         # TODO: hook up the below stuff too like above
-        # TAG
-        self.tags_lbl = ttk.Label(self.main_frame, text='Tags:')
-        self.tags_lbl.pack(side='top', fill='both', expand=True)
-        self.tags_var = tk.StringVar(self.main_frame)
-        self.tags_entry = ttk.Entry(self.main_frame, textvariable=self.tags_var)
-        self.tags_entry.pack(side='top', fill='both', expand=True)
-
-        # CONTENT
-        # TODO: think about putting this at the top or highlighting it or make it easier to click into or something
-        self.content_lbl = ttk.Label(self.main_frame, text='Content:')
-        self.content_lbl.pack(side='top', fill='both', expand=True)
-
-        self.content_var = tk.StringVar(self.main_frame)
-        self.content_text = tk.Entry(self.main_frame, textvariable=self.content_var)
-        self.content_text.pack(side='top', fill='both', expand=True)
-
-        # COMMENTS
-        self.comment_lbl = ttk.Label(self.main_frame, text='Comment:')
-        self.comment_lbl.pack(side='top', fill='both', expand=True)
-
-        # TODO: Scrollbar here in case of lots of text?
-        self.comment_var = tk.StringVar(self.main_frame)
-        self.comment_text = tk.Text(self.main_frame, height=20)
-        self.comment_text.bind('<KeyRelease>', lambda e: self.comment_var.set(e.widget.get('1.0', 'end-1c')))
-        self.comment_text.insert('1.0', self.note_txt)
-        self.comment_text.pack(side='top', fill='both', expand=True)
+        self.tags_lbl, self.tags_var, self.tags_entry = self.create_tags(self.main_frame)
+        # TODO: think about putting content at the top or highlighting it or make it easier to click into or something
+        self.content_lbl, self.content_var, self.content_entry = self.create_content(self.main_frame)
+        self.comment_lbl, self.comment_var, self.comment_text = self.create_comment(self.main_frame)
 
         # BUTTONS
         self.buttons_down = tk.Frame(self)
@@ -154,42 +128,97 @@ class AddNotesView(tk.Frame):
             width = event.width
             self.canvas.itemconfigure(main_frame_id, width=width)
         self.canvas.bind('<Configure>', on_canvas_configure)
+    
+    def create_time(self, parent):
+        label = ttk.Label(parent, text='Time:')
+        label.pack(side='top', fill='both', expand=True)
 
-    def on_time_var_change(self):
+        var = tk.StringVar(parent)
+        var.trace_add('write', lambda *args: self.on_time_change())
+        self.controller.subscribe_to_timestamp(
+            # TODO: maybe create a sub ufnction that delivers the converted daytime isntead of defining it here
+            # basically, just make it so you can give in "lambda time: self.time_var.set(time)"
+            lambda timestamp: var.set(str(datetime.fromtimestamp(timestamp))[:-3])
+        )
+
+        entry = tk.Entry(parent, textvariable=var)  # needs to be tk since ttk doesn't have bg colors...
+        entry.pack(side='top', fill='both', expand=True)
+
+        return label, var, entry
+
+    def on_time_change(self):
         is_success = self.controller.set_timestamp(self.time_var.get())
         if is_success:
             self.time_entry.config(bg='white')
         else:
             self.time_entry.config(bg='red')
+    
+    def create_type(self, parent):
+        label = ttk.Label(parent, text='Type:')
+        label.pack(side='top', fill='both', expand=True)
+
+        var = tk.StringVar(parent)
+        var.trace_add('write', lambda *args: self.on_type_var_change())
+        self.controller.subscribe_to_selected_type(lambda new_type: var.set(new_type))
+
+        combobox = ttk.Combobox(parent, textvariable=var)
+        def set_values(values):  # can't do assignmnents in lambadas so have to do this...
+            combobox['values'] = values
+        self.controller.subscribe_to_type_list(set_values)
+        combobox.pack(side='top', fill='both', expand=True)
+
+        return label, var, combobox
 
     def on_type_var_change(self):
         self.controller.set_selected_type(self.type_var.get())
-
-    def set_time(self, time_str):
-        self.time_var.set(time_str)
-
-    def add_save_command(self, command):
-        self.savebtn.config(command=command)
-
-    def set_types_list(self, types):
-        self.type_combobox['values'] = types
-
-    def add_callback_type_create(self, func):
-        pass
-        # TODO: maybe don't create, only when saving
-        # self.type_combobox.bind('<FocusOut>', lambda e: func(self.type_combobox.get()))
-        # self.type_combobox.bind('<Return>', lambda e: func(self.type_combobox.get()))
     
-    def add_callback_type_select(self, func):
-        self.type_combobox.bind('<FocusOut>', lambda e: func(self.type_combobox.get()))
-        self.type_combobox.bind('<<ComboboxSelected>>', lambda e: func(self.type_combobox.get()))
+    def create_tags(self, parent):
+        label = ttk.Label(parent, text='Tags:')
+        label.pack(side='top', fill='both', expand=True)
+
+        var = tk.StringVar(parent)
+        var.trace_add('write', lambda *args: self.on_tags_var_change())
+        self.controller.subscribe_to_tags(lambda new_tags: var.set(new_tags))
+
+        entry = ttk.Entry(parent, textvariable=var)
+        entry.pack(side='top', fill='both', expand=True)
+
+        return label, var, entry
     
-    def add_callback_tags_select(self, func):
-        self.tags_entry.bind('<FocusOut>', lambda e: func(self.tags_entry.get()))
-        self.tags_entry.bind('<Return>', lambda e: func(self.tags_entry.get()))
+    def on_tags_var_change(self):
+        self.controller.set_tags(self.tags_var.get())
+    
+    def create_content(self, parent):
+        label = ttk.Label(parent, text='Content:')
+        label.pack(side='top', fill='both', expand=True)
 
-    def add_content_callback(self, func):
-        self.content_var.trace_add('write', lambda *args: func(self.content_var.get()))
+        var = tk.StringVar(parent)
+        var.trace_add('write', lambda *args: self.on_content_var_change())
+        self.controller.subscribe_to_content(lambda new_content: var.set(new_content))
 
-    def add_comment_callback(self, func):
-        self.comment_var.trace_add('write', lambda *args: func(self.comment_var.get()))
+        entry = tk.Entry(parent, textvariable=var)
+        entry.pack(side='top', fill='both', expand=True)
+
+        return label, var, entry
+    
+    def on_content_var_change(self):
+        self.controller.set_content(self.content_var.get())
+    
+    def create_comment(self, parent):
+        # TODO: Scrollbar here in case of lots of text?
+        label = ttk.Label(parent, text='Comment:')
+        label.pack(side='top', fill='both', expand=True)
+
+        var = tk.StringVar(parent)
+        var.trace_add('write', lambda *args: self.on_comment_var_change())
+        self.controller.subscribe_to_comment(lambda new_comment: var.set(new_comment))
+    
+        text = tk.Text(parent, height=20)
+        text.bind('<KeyRelease>', lambda e: var.set(e.widget.get('1.0', 'end-1c')))
+        # text.insert('1.0', self.note_txt)
+        text.pack(side='top', fill='both', expand=True)
+
+        return label, var, text
+
+    def on_comment_var_change(self):
+        self.controller.set_comment(self.comment_var.get())

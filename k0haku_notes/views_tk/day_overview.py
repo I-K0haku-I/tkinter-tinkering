@@ -35,7 +35,7 @@ class DayOverview(tk.Frame):
         self.edit_btn = edit_btn
     
     def create_add_note(self):
-        data = self.controller.get_selected_note_id()
+        id = self.controller.get_selected_note_id()
         new_window = tk.Toplevel(self)
         from .note_form import AddNotesView
         add_note = AddNotesView(new_window, self.controller.root, id=id)

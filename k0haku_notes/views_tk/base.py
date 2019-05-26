@@ -28,7 +28,7 @@ class RootNotesAppView:
 
 
 
-
+# TODO not used anymore:
 class NotesAppView(tk.Tk):
     def __init__(self, controller, *args, **kwargs):
         super().__init__(*args, **kwargs)

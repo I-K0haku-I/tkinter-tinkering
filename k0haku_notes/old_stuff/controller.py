@@ -58,7 +58,7 @@ class NotesAppController:
     
     def update_timestamp(self, datetime_str):
         return self.set_timestamp(datetime_str)
-    
+
     def update_view_time(self, timestamp):
         return self.note_form.set_time(datetime.fromtimestamp(timestamp))
 
