@@ -95,3 +95,4 @@ class NotesAppMenu(tk.Menu):
         self.add_cascade(label='Stuff...', menu=self.submenu)
         self.add_cascade(label='Stuff2...', menu=self.submenu)
         self.add_cascade(label='Stuff3...', menu=self.subsubmenu)
+

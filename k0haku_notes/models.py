@@ -3,14 +3,15 @@ from datetime import datetime
 
 from base_api_connector import AsDictObject
 
+
 class ObservableVar:
     _callbacks = None  # can't initiate dict here because it will be the same for all ObservableVar instances for some reason
-    
+
     def __init__(self, start_val=0, identity=None):
-        self._callbacks = {} 
+        self._callbacks = {}
         self.identity = identity
         self.data = start_val
-    
+
     def add_callback(self, callback):
         self._callbacks[callback] = 1
 
@@ -20,7 +21,7 @@ class ObservableVar:
     def set(self, value):
         self.data = value
         self._do_callbacks()
-    
+
     def _do_callbacks(self):
         for func in self._callbacks:
             func(self.data)
@@ -54,6 +55,9 @@ class TempModel:
         self.selected_tags_list = ListObservableVar([], 'selected_tags_list')
         self.content = ObservableVar('', 'content')
         self.comment = ObservableVar('', 'comment')
+
+    def convert_to_datetime_str(self, timestamp):
+        return str(datetime.fromtimestamp(timestamp))[:-3]
 
     def convert_to_timestamp(self, datetime_string):
         return datetime.fromisoformat(str(datetime_string)).replace(microsecond=0, second=0).timestamp()
