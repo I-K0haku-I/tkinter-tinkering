@@ -8,7 +8,7 @@ class DayOverviewController:
 
     def get_selected_note_id(self):
         data = self.root
-        return data
+        return 1
 
 class DayOverview(tk.Frame):
     def __init__(self, parent, root_controller):

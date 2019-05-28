@@ -3,7 +3,7 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import ttk
 
-from models import TempModel
+from models import NoteModel
 from views_tk.base import NotesAppView
 from views_tk.note_form import AddNotesView
 from views_tk.start_page import StartPage
@@ -19,7 +19,7 @@ class NotesAppController:
 
     def __init__(self, *args, **kwargs):
         self.view = NotesAppView(self)
-        self.model = TempModel()
+        self.model = NoteModel()
 
         # VIEW: START PAGE
         start_page: StartPage = self.view.get_interior(StartPage)

@@ -2,28 +2,28 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
 
-from models import TempModel
+from models import NoteModel
 from .widgets import AutoScrollbar, ScrollableFrame, TimeField, ComboboxField, EntryField, TextField
 
 
-class AddNotesController:
-    def __init__(self, root):
+class AddNotesAdapter:
+    def __init__(self, root, id):
         self.root = root
-        self.model = TempModel()
+        self.model = NoteModel()
         self.on_timestamp_validate = lambda bool: None
+        if id:
+            self.model.load(id)
 
     def init_values(self):
         self.set_timestamp(datetime.today())
         self.model.types_list.set(['test', 'test2'])
-
-    def load_note(self, id):
-        self.model
 
     def save_note(self):
         # print(self.model.timestamp.get())
         # print(self.note_form.time_var.get())
         # print(self.model.selected_type.get())
         print(self.model)
+        self.model.store()
 
     def subscribe_to_timestamp(self, func):
         def func_as_str(timestamp):
@@ -74,9 +74,7 @@ class AddNotesView(tk.Frame):
     def __init__(self, parent, root_controller, id=None):
         super().__init__(parent)
         self.parent = parent
-        self.controller = AddNotesController(root_controller)
-        if id:
-            self.controller.load_note(id)
+        self.controller = AddNotesAdapter(root_controller, id)
         self.init_ui()
         self.controller.init_values()
         self.content_field.entry.focus()
@@ -93,6 +91,7 @@ class AddNotesView(tk.Frame):
         # TODO: exec submit when enter
         self.content_field = EntryField(self.main_frame, label_text='Content:')
         self.content_field.pack(side='top', fill='both', expand=True)
+        self.content_field.entry.bind('<Return>', lambda event: self.save())
         self.content_field.subscribe_to_var(self.controller.set_content)
         self.controller.subscribe_to_content(self.content_field.set_var)
 
@@ -133,7 +132,7 @@ class AddNotesView(tk.Frame):
         self.savebtn = ttk.Button(self, text='Save')
         self.savebtn.grid(row=1, column=0, columnspan=2, sticky='nswe')
         self.grid_rowconfigure(1, minsize=50)
-        self.savebtn.config(command=self.controller.save_note)
+        self.savebtn.config(command=self.save)
 
         # self.closebtn = ttk.Button(self.buttons_down, text='Close')
         # self.closebtn.grid(row=0, column=2, sticky='nswe')
@@ -144,3 +143,7 @@ class AddNotesView(tk.Frame):
             self.time_field.entry.config(bg='white')
         else:
             self.time_field.entry.config(bg='red')
+    
+    def save(self):
+        self.controller.save_note()
+        self.parent.destroy()

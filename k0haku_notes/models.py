@@ -3,6 +3,8 @@ from datetime import datetime
 
 from base_api_connector import AsDictObject
 
+from utils.notes_db_connector import NotesDBConnector
+
 
 class ObservableVar:
     _callbacks = None  # can't initiate dict here because it will be the same for all ObservableVar instances for some reason
@@ -30,6 +32,14 @@ class ObservableVar:
         return str(self.data)
 
 
+class NoteObject(AsDictObject): # TODO: remember to update asdictobject in the other module
+    time = datetime.now().timestamp()
+    content = 'Placeholder'
+    detail = 'Placeholder'
+    types = []
+    tags = []
+
+
 class ListObservableVar(ObservableVar):
     def __init__(self, start_val=[], identity=None):
         if not isinstance(start_val, list):
@@ -40,7 +50,35 @@ class ListObservableVar(ObservableVar):
         self.data.append(value)
 
 
-class TempModel:
+essential_data = None
+
+
+class DBManager:
+    def __init__(self):
+        self.conn = NotesDBConnector()
+        self._tags = None
+        self._types = None
+
+    def get_tags(self):
+        if self._tags is None:
+            self._tags = self.conn.tags.list()
+    
+    def get_types(self):
+        if self._types is None:
+            self._types = self.conn.types.list()
+
+    def __getattr__(self, attr):
+        return getattr(self.conn, attr)
+
+
+def get_db_manager():
+    global essential_data
+    if essential_data is None:
+        essential_data = DBManager()
+    return essential_data
+
+
+class NoteModel:
     timestamp = None
     selected_type = None
     types_list = None
@@ -55,6 +93,25 @@ class TempModel:
         self.selected_tags_list = ListObservableVar([], 'selected_tags_list')
         self.content = ObservableVar('', 'content')
         self.comment = ObservableVar('', 'comment')
+
+        self.db_manager = get_db_manager()
+
+    def load(self, id):
+        self.id = id
+        r = self.db_manager.notes.retrieve(id)
+        note = NoteObject()
+        print(r)
+        note.from_dict(r.json())
+        print(note.as_dict())
+
+    def store(self):
+        note = NoteObject()
+        note.time = self.timestamp
+        note.content = self.content
+        note.detail = self.comment
+        note.types = self.selected_type
+        note.tags = self.selected_tags_list
+        self.db_manager.notes.create(note)
 
     def convert_to_datetime_str(self, timestamp):
         return str(datetime.fromtimestamp(timestamp))[:-3]

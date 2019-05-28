@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from .widgets import FrameHolder
 
-from models import TempModel 
+from models import NoteModel 
 from .note_form import AddNotesView
 from .start_page import StartPage
 from .day_overview import DayOverview
@@ -10,13 +10,15 @@ from .day_overview import DayOverview
 
 class RootNotesAppController:
     def __init__(self):
-        self.model = TempModel()
+        self.model = NoteModel()
 
 
-class RootNotesAppView:
+class RootNotesApp:
     def __init__(self):
         self.root = RootNotesAppController()
+
         main_window = tk.Tk()
+
         day_overview_frame = DayOverview(main_window, self.root)
         day_overview_frame.pack(side='top', fill='both', expand=True)
 
