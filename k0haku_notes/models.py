@@ -32,13 +32,6 @@ class ObservableVar:
         return str(self.data)
 
 
-class NoteObject(AsDictObject): # TODO: remember to update asdictobject in the other module
-    time = datetime.now().timestamp()
-    content = 'Placeholder'
-    detail = 'Placeholder'
-    types = []
-    tags = []
-
 
 class ListObservableVar(ObservableVar):
     def __init__(self, start_val=[], identity=None):
@@ -61,11 +54,44 @@ class DBManager:
 
     def get_tags(self):
         if self._tags is None:
-            self._tags = self.conn.tags.list()
+            self._tags = self.conn.tags.list().json()
+        return self._tags
     
     def get_types(self):
         if self._types is None:
-            self._types = self.conn.types.list()
+            self._types = self.conn.types.list().json()
+        return self._types
+        
+    def get_type_by_id(self, id):
+        for type in self.get_types():
+            if type['id'] == id:
+                return type
+
+    def get_type_id(self, str):
+        # TODO: add create if doesn't exist
+        for type in self.get_types():
+            if type['name'] == str:
+                return type['id']
+
+    def get_tags_ids(self, str_list):
+        return list(self._tags_convert_string_to_ids(str_list))
+    
+    def _tags_convert_string_to_ids(self, str_list):
+        for str in str_list:
+            for tag in self.get_tags():
+                if tag['name'] == str:
+                    yield tag['id']
+                    continue
+
+    def get_tags_by_ids(self, id_list):
+        return list(self._tags_convert_ids_to_string(id_list))
+
+    def _tags_convert_ids_to_string(self, id_list):
+        for id in id_list:
+            for tag in self.get_tags():
+                if tag['id'] == id:
+                    yield tag['name']
+                    continue
 
     def __getattr__(self, attr):
         return getattr(self.conn, attr)
@@ -76,6 +102,14 @@ def get_db_manager():
     if essential_data is None:
         essential_data = DBManager()
     return essential_data
+
+
+class NoteObject(AsDictObject): # TODO: remember to update asdictobject in the other module
+    time = datetime.now().timestamp()
+    content = 'Placeholder'
+    detail = 'Placeholder'
+    types = []
+    tags = []
 
 
 class NoteModel:
@@ -97,21 +131,40 @@ class NoteModel:
         self.db_manager = get_db_manager()
 
     def load(self, id):
-        self.id = id
         r = self.db_manager.notes.retrieve(id)
-        note = NoteObject()
-        print(r)
-        note.from_dict(r.json())
-        print(note.as_dict())
+        note_dict = r.json()
+        if r.status_code != 200:
+            return
 
-    def store(self):
+        # TODO: make time return timestamp
+        new_time = datetime.strptime(note_dict['time'], "%Y-%m-%dT%H:%M:%SZ").timestamp()
+        self.timestamp.set(new_time) 
+
+        type_ids = note_dict['types']
+        new_selected_type = self.db_manager.get_type_by_id(type_ids[0])['name']
+        self.selected_type.set(new_selected_type)
+
+        tag_ids = note_dict['tags']
+        self.selected_tags_list.set(self.db_manager.get_tags_by_ids(tag_ids))
+        
+        content = note_dict['content']
+        self.content.set(content)
+
+        comment = note_dict['detail']
+        self.comment.set(comment)
+
+    def store(self, id):
         note = NoteObject()
-        note.time = self.timestamp
-        note.content = self.content
-        note.detail = self.comment
-        note.types = self.selected_type
-        note.tags = self.selected_tags_list
-        self.db_manager.notes.create(note)
+        note.time = datetime.strftime(datetime.fromtimestamp(self.timestamp.get()), "%Y-%m-%dT%H:%M:%SZ")
+        note.content = self.content.get()
+        note.detail = self.comment.get()
+        note.types = [self.db_manager.get_type_id(self.selected_type.get())]
+        note.tags = self.db_manager.get_tags_ids(self.selected_tags_list.get())
+        if id:
+            r = self.db_manager.notes.update(id, note)
+        else:
+            r = self.db_manager.notes.create(note)
+        return r
 
     def convert_to_datetime_str(self, timestamp):
         return str(datetime.fromtimestamp(timestamp))[:-3]

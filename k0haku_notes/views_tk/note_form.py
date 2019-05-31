@@ -7,23 +7,24 @@ from .widgets import AutoScrollbar, ScrollableFrame, TimeField, ComboboxField, E
 
 
 class AddNotesAdapter:
-    def __init__(self, root, id):
-        self.root = root
+    def __init__(self, id=None):
+        self.id = id
         self.model = NoteModel()
         self.on_timestamp_validate = lambda bool: None
-        if id:
-            self.model.load(id)
 
     def init_values(self):
-        self.set_timestamp(datetime.today())
-        self.model.types_list.set(['test', 'test2'])
+        if self.id:
+            self.model.load(self.id)
+        pass
+        # self.set_timestamp(datetime.today())
+        # self.model.types_list.set(['test', 'test2'])
 
     def save_note(self):
         # print(self.model.timestamp.get())
         # print(self.note_form.time_var.get())
         # print(self.model.selected_type.get())
         print(self.model)
-        self.model.store()
+        self.model.store(self.id)
 
     def subscribe_to_timestamp(self, func):
         def func_as_str(timestamp):
@@ -71,10 +72,10 @@ class AddNotesAdapter:
 
 
 class AddNotesView(tk.Frame):
-    def __init__(self, parent, root_controller, id=None):
+    def __init__(self, parent, id=None):
         super().__init__(parent)
         self.parent = parent
-        self.controller = AddNotesAdapter(root_controller, id)
+        self.controller = AddNotesAdapter(id)
         self.init_ui()
         self.controller.init_values()
         self.content_field.entry.focus()
@@ -88,7 +89,6 @@ class AddNotesView(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # TODO: exec submit when enter
         self.content_field = EntryField(self.main_frame, label_text='Content:')
         self.content_field.pack(side='top', fill='both', expand=True)
         self.content_field.entry.bind('<Return>', lambda event: self.save())

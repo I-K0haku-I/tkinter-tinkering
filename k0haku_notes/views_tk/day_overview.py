@@ -3,20 +3,19 @@ from tkinter import ttk
 
 
 class DayOverviewController:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self):
+        pass
 
     def get_selected_note_id(self):
-        data = self.root
-        return 1
+        return 2
 
 class DayOverview(tk.Frame):
-    def __init__(self, parent, root_controller):
+    def __init__(self, parent):
         super().__init__(parent)
         self.grid_columnconfigure(1, weight=1, minsize=70)
         self.grid_columnconfigure(0, weight=1, minsize=300)
 
-        self.controller = DayOverviewController(root_controller)
+        self.controller = DayOverviewController()
 
         tree = BetterTreeview(self)
         tree.set_headers((('time', 50), ('note', 200), ('type', 50)))
@@ -38,7 +37,7 @@ class DayOverview(tk.Frame):
         id = self.controller.get_selected_note_id()
         new_window = tk.Toplevel(self)
         from .note_form import AddNotesView
-        add_note = AddNotesView(new_window, self.controller.root, id=id)
+        add_note = AddNotesView(new_window, id=id)
         add_note.pack(side='top', fill='both', expand=True)
 
 

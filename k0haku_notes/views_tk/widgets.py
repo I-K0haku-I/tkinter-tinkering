@@ -137,6 +137,11 @@ class TextField(FieldFrame):
 
         text = tk.Text(self, height=20)
         text.bind('<KeyRelease>', lambda e: self.var.set(e.widget.get('1.0', 'end-1c')))
+        self.var.trace_add('write', lambda *args: self.reset_text())
         text.pack(side='top', fill='both', expand=True)
 
         self.text = text
+
+    def reset_text(self):
+        self.text.delete('1.0', 'end')
+        self.text.insert('end', self.var.get())
