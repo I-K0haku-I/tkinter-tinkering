@@ -87,9 +87,8 @@ class FieldFrame(tk.Frame):
     def subscribe_to_var(self, func):
         self.on_write_func = lambda: func(self.var.get())
 
-    def set_var(self, new_comment):
-        self.var.set(new_comment)
-
+    def set_var(self, data):  # neede because set not hashable
+        self.var.set(data)
 
 class EntryField(FieldFrame):
     def __init__(self, parent, *args, **kwargs):

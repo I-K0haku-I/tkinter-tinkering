@@ -2,8 +2,7 @@ import tkinter as tk
 from datetime import datetime
 
 from base_api_connector import AsDictObject
-
-from utils.notes_db_connector import NotesDBConnector
+from utils.db_manager import get_db_manager
 
 
 class ObservableVar:
@@ -32,7 +31,6 @@ class ObservableVar:
         return str(self.data)
 
 
-
 class ListObservableVar(ObservableVar):
     def __init__(self, start_val=[], identity=None):
         if not isinstance(start_val, list):
@@ -43,73 +41,82 @@ class ListObservableVar(ObservableVar):
         self.data.append(value)
 
 
-essential_data = None
-
-
-class DBManager:
-    def __init__(self):
-        self.conn = NotesDBConnector()
-        self._tags = None
-        self._types = None
-
-    def get_tags(self):
-        if self._tags is None:
-            self._tags = self.conn.tags.list().json()
-        return self._tags
-    
-    def get_types(self):
-        if self._types is None:
-            self._types = self.conn.types.list().json()
-        return self._types
-        
-    def get_type_by_id(self, id):
-        for type in self.get_types():
-            if type['id'] == id:
-                return type
-
-    def get_type_id(self, str):
-        # TODO: add create if doesn't exist
-        for type in self.get_types():
-            if type['name'] == str:
-                return type['id']
-
-    def get_tags_ids(self, str_list):
-        return list(self._tags_convert_string_to_ids(str_list))
-    
-    def _tags_convert_string_to_ids(self, str_list):
-        for str in str_list:
-            for tag in self.get_tags():
-                if tag['name'] == str:
-                    yield tag['id']
-                    continue
-
-    def get_tags_by_ids(self, id_list):
-        return list(self._tags_convert_ids_to_string(id_list))
-
-    def _tags_convert_ids_to_string(self, id_list):
-        for id in id_list:
-            for tag in self.get_tags():
-                if tag['id'] == id:
-                    yield tag['name']
-                    continue
-
-    def __getattr__(self, attr):
-        return getattr(self.conn, attr)
-
-
-def get_db_manager():
-    global essential_data
-    if essential_data is None:
-        essential_data = DBManager()
-    return essential_data
-
-
 class NoteObject(AsDictObject): # TODO: remember to update asdictobject in the other module
     time = datetime.now().timestamp()
     content = 'Placeholder'
     detail = 'Placeholder'
     types = []
     tags = []
+
+
+class BaseModel:
+    def __init__(self, init_value):
+        self.var = ObservableVar(init_value)
+    
+    def get(self):
+        return self.var.get()
+    
+    def set(self, value):
+        return self.var.set(value)
+    
+    def on_change(self, func):
+        self.var.add_callback(func)
+
+
+class ListBaseModel(BaseModel):  # might do some try blocks to make sure it's a list
+    def append(self, value):
+        self.var.data.append(value) 
+
+
+class TimeModel(BaseModel):
+    def get(self, as_datetime=False):
+        if as_datetime:
+            return self.timestamp_to_datetime(self.var.get())
+        else:
+            return str(self.var.get())
+    
+    def timestamp_to_datetime(self, value):
+        return str(datetime.fromtimestamp(value))[:-3]
+    
+    def set(self, iso_time, on_timestamp_validate=lambda is_validated: None):
+        try:
+            time = datetime.fromisoformat(str(iso_time)).replace(microsecond=0, second=0).timestamp()
+            self.var.set(time)
+            on_timestamp_validate(True)
+        except:
+            on_timestamp_validate(False)
+
+    def on_change(self, func):
+        def wrapper(value):
+            func(self.timestamp_to_datetime(value))
+        self.var.add_callback(wrapper)
+
+
+class SelectedTypeModel(BaseModel):
+    pass
+
+
+class TypesListModel(ListBaseModel):
+    pass
+
+
+class SelectedTagsListModel(ListBaseModel):
+    def set(self, value):
+        new_tags_list = [tag.strip() for tag in value.split(',')]
+        super().set(new_tags_list)
+    
+    def on_change(self, func):
+        def func_converted_as_comma_separated_str(value): 
+            func(','.join(value))
+        super().on_change(func_converted_as_comma_separated_str)
+
+
+class ContentModel(BaseModel):
+    pass
+
+
+class CommentModel(BaseModel):
+    pass
 
 
 class NoteModel:
@@ -137,12 +144,16 @@ class NoteModel:
             return
 
         # TODO: make time return timestamp
+        # move convert logic to db_manager
         new_time = datetime.strptime(note_dict['time'], "%Y-%m-%dT%H:%M:%SZ").timestamp()
         self.timestamp.set(new_time) 
 
         type_ids = note_dict['types']
-        new_selected_type = self.db_manager.get_type_by_id(type_ids[0])['name']
-        self.selected_type.set(new_selected_type)
+        try:
+            new_selected_type = self.db_manager.get_type_by_id(type_ids[0])['name']
+            self.selected_type.set(new_selected_type)
+        except:
+            pass
 
         tag_ids = note_dict['tags']
         self.selected_tags_list.set(self.db_manager.get_tags_by_ids(tag_ids))
@@ -176,6 +187,7 @@ class NoteModel:
         return (f"{self.timestamp}, {self.selected_type}"
                 f", {self.selected_tags_list}, {self.content}"
                 f", {self.comment}")
+
 
 # class Model():
 #     _tk_var_fields = None
