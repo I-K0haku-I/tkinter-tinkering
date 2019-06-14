@@ -69,27 +69,25 @@ class ListBaseModel(BaseModel):  # might do some try blocks to make sure it's a 
 
 
 class TimeModel(BaseModel):
-    def get(self, as_datetime=False):
-        if as_datetime:
-            return self.timestamp_to_datetime(self.var.get())
-        else:
-            return str(self.var.get())
+    def get(self):
+        return self.datetime_to_str(self.var.get())
+
+    def datetime_to_str(self, value):
+        return str(value)[:-3]
     
-    def timestamp_to_datetime(self, value):
-        return str(datetime.fromtimestamp(value))[:-3]
-    
-    def set(self, iso_time, on_timestamp_validate=lambda is_validated: None):
+    def set_string(self, iso_time, on_timestamp_validate=lambda is_validated: None):
         try:
-            time = datetime.fromisoformat(str(iso_time)).replace(microsecond=0, second=0).timestamp()
-            self.var.set(time)
+            time = datetime.fromisoformat(str(iso_time)).replace(microsecond=0, second=0)
+            super().set(time)
             on_timestamp_validate(True)
         except:
             on_timestamp_validate(False)
 
     def on_change(self, func):
-        def wrapper(value):
-            func(self.timestamp_to_datetime(value))
-        self.var.add_callback(wrapper)
+        def func_with_value_as_str(value):
+            value = self.datetime_to_str(value)
+            func(value)
+        super().on_change(func_with_value_as_str)
 
 
 class SelectedTypeModel(BaseModel):
@@ -101,7 +99,7 @@ class TypesListModel(ListBaseModel):
 
 
 class SelectedTagsListModel(ListBaseModel):
-    def set(self, value):
+    def set_string(self, value):
         new_tags_list = [tag.strip() for tag in value.split(',')]
         super().set(new_tags_list)
     

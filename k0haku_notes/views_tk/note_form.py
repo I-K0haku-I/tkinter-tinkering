@@ -26,28 +26,28 @@ class AddNotesView(tk.Frame):
         self.content_field = EntryField(self.main_frame, label_text='Content:')
         self.content_field.pack(side='top', fill='both', expand=True)
         self.content_field.entry.bind('<Return>', lambda event: self.save())
-        self.content_field.subscribe_to_var(self.controller.content.set)
+        self.content_field.on_write(self.controller.content.set)
         self.controller.content.on_change(self.content_field.set_var)
 
         self.time_field = EntryField(self.main_frame, label_text='Time:')
         self.time_field.pack(side='top', fill='both', expand=True)
-        self.time_field.subscribe_to_var(lambda val: self.controller.timestamp.set(val, self.set_time_color))
+        self.time_field.on_write(lambda val: self.controller.timestamp.set_string(val, self.set_time_color))
         self.controller.timestamp.on_change(self.time_field.set_var)
 
         self.type_field = ComboboxField(self.main_frame, label_text='Type:')
         self.type_field.pack(side='top', fill='both', expand=True)
-        self.type_field.subscribe_to_var(self.controller.selected_type.set)
+        self.type_field.on_write(self.controller.selected_type.set)
         self.controller.selected_type.on_change(self.type_field.set_var)
         self.controller.types_list.on_change(self.type_field.set_dropdown)
 
         self.tags_field = EntryField(self.main_frame, label_text='Tags:')
         self.tags_field.pack(side='top', fill='both', expand=True)
-        self.tags_field.subscribe_to_var(self.controller.selected_tags_list.set)
+        self.tags_field.on_write(self.controller.selected_tags_list.set_string)
         self.controller.selected_tags_list.on_change(self.tags_field.set_var)
 
         self.comment_field = TextField(self.main_frame, label_text='Comment:')
         self.comment_field.pack(side='top', fill='both', expand=True)
-        self.comment_field.subscribe_to_var(self.controller.comment.set)
+        self.comment_field.on_write(self.controller.comment.set)
         self.controller.comment.on_change(self.comment_field.set_var)
 
         self.main_frame.init_scrollbar()
@@ -78,5 +78,5 @@ class AddNotesView(tk.Frame):
             self.time_field.entry.config(bg='red')
 
     def save(self):
-        self.controller.save_note()
+        self.controller.store()
         self.parent.destroy()

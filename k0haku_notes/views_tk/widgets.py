@@ -84,7 +84,7 @@ class FieldFrame(tk.Frame):
         self.label = label
         self.var = var
 
-    def subscribe_to_var(self, func):
+    def on_write(self, func):
         self.on_write_func = lambda: func(self.var.get())
 
     def set_var(self, data):  # neede because set not hashable
@@ -104,7 +104,7 @@ class TimeField(EntryField):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
-    def subscribe_to_var(self, func):
+    def on_write(self, func):
         self.on_write_func = self.set_validation_color(func)
 
     def set_validation_color(self, func):
