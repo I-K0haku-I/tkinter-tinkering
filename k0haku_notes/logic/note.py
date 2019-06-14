@@ -45,7 +45,7 @@ class AddNotesAdapter:
             note_dict['types'] = types[0] if isinstance(types, list) else types
             note_dict['types'] = self.db_manager.get_type_by_id(note_dict['types'])['name']
 
-        note_dict['tags'] = self.db_manager.get_tags_by_ids(note_dict)
+        note_dict['tags'] = self.db_manager.get_tags_by_ids(note_dict['tags'])
 
     def load(self):
         r = self.db_manager.notes.retrieve(self.id)

@@ -4,7 +4,7 @@ from .widgets import FrameHolder
 
 from .note_form import AddNotesView
 from .start_page import StartPage
-from .day_overview import DayOverview
+from .day_overview_list import DayOverview
 
 
 class RootNotesApp:

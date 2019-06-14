@@ -64,9 +64,16 @@ class BaseModel:
 
 
 class ListBaseModel(BaseModel):  # might do some try blocks to make sure it's a list
-    def append(self, value):
-        self.var.data.append(value) 
+    def __init__(self, init_value):
+        self.on_append_func = lambda value: None
+        super().__init__(init_value)
+    
+    def append_without_event(self, value):
+        self.var.data.append(value)
 
+    def append(self, value):  # ugly?
+        self.append_without_event(value)
+        self.on_append_func(value)
 
 class TimeModel(BaseModel):
     def get(self):
@@ -108,6 +115,8 @@ class SelectedTagsListModel(ListBaseModel):
             func(','.join(value))
         super().on_change(func_converted_as_comma_separated_str)
 
+    
+
 
 class ContentModel(BaseModel):
     pass
@@ -117,74 +126,77 @@ class CommentModel(BaseModel):
     pass
 
 
-class NoteModel:
-    timestamp = None
-    selected_type = None
-    types_list = None
-    selected_tags_list = None
-    content = None
-    comment = None
+class NoteListModel(ListBaseModel):
+    pass
 
-    def __init__(self):
-        self.timestamp = ObservableVar(0, 'timestamp')
-        self.types_list = ListObservableVar([], 'types')
-        self.selected_type = ObservableVar('', 'selected_type')
-        self.selected_tags_list = ListObservableVar([], 'selected_tags_list')
-        self.content = ObservableVar('', 'content')
-        self.comment = ObservableVar('', 'comment')
+# class NoteModel:
+#     timestamp = None
+#     selected_type = None
+#     types_list = None
+#     selected_tags_list = None
+#     content = None
+#     comment = None
 
-        self.db_manager = get_db_manager()
+#     def __init__(self):
+#         self.timestamp = ObservableVar(0, 'timestamp')
+#         self.types_list = ListObservableVar([], 'types')
+#         self.selected_type = ObservableVar('', 'selected_type')
+#         self.selected_tags_list = ListObservableVar([], 'selected_tags_list')
+#         self.content = ObservableVar('', 'content')
+#         self.comment = ObservableVar('', 'comment')
 
-    def load(self, id):
-        r = self.db_manager.notes.retrieve(id)
-        note_dict = r.json()
-        if r.status_code != 200:
-            return
+#         self.db_manager = get_db_manager()
 
-        # TODO: make time return timestamp
-        # move convert logic to db_manager
-        new_time = datetime.strptime(note_dict['time'], "%Y-%m-%dT%H:%M:%SZ").timestamp()
-        self.timestamp.set(new_time) 
+#     def load(self, id):
+#         r = self.db_manager.notes.retrieve(id)
+#         note_dict = r.json()
+#         if r.status_code != 200:
+#             return
 
-        type_ids = note_dict['types']
-        try:
-            new_selected_type = self.db_manager.get_type_by_id(type_ids[0])['name']
-            self.selected_type.set(new_selected_type)
-        except:
-            pass
+#         # TODO: make time return timestamp
+#         # move convert logic to db_manager
+#         new_time = datetime.strptime(note_dict['time'], "%Y-%m-%dT%H:%M:%SZ").timestamp()
+#         self.timestamp.set(new_time) 
 
-        tag_ids = note_dict['tags']
-        self.selected_tags_list.set(self.db_manager.get_tags_by_ids(tag_ids))
+#         type_ids = note_dict['types']
+#         try:
+#             new_selected_type = self.db_manager.get_type_by_id(type_ids[0])['name']
+#             self.selected_type.set(new_selected_type)
+#         except:
+#             pass
+
+#         tag_ids = note_dict['tags']
+#         self.selected_tags_list.set(self.db_manager.get_tags_by_ids(tag_ids))
         
-        content = note_dict['content']
-        self.content.set(content)
+#         content = note_dict['content']
+#         self.content.set(content)
 
-        comment = note_dict['detail']
-        self.comment.set(comment)
+#         comment = note_dict['detail']
+#         self.comment.set(comment)
 
-    def store(self, id):
-        note = NoteObject()
-        note.time = datetime.strftime(datetime.fromtimestamp(self.timestamp.get()), "%Y-%m-%dT%H:%M:%SZ")
-        note.content = self.content.get()
-        note.detail = self.comment.get()
-        note.types = [self.db_manager.get_type_id(self.selected_type.get())]
-        note.tags = self.db_manager.get_tags_ids(self.selected_tags_list.get())
-        if id:
-            r = self.db_manager.notes.update(id, note)
-        else:
-            r = self.db_manager.notes.create(note)
-        return r
+#     def store(self, id):
+#         note = NoteObject()
+#         note.time = datetime.strftime(datetime.fromtimestamp(self.timestamp.get()), "%Y-%m-%dT%H:%M:%SZ")
+#         note.content = self.content.get()
+#         note.detail = self.comment.get()
+#         note.types = [self.db_manager.get_type_id(self.selected_type.get())]
+#         note.tags = self.db_manager.get_tags_ids(self.selected_tags_list.get())
+#         if id:
+#             r = self.db_manager.notes.update(id, note)
+#         else:
+#             r = self.db_manager.notes.create(note)
+#         return r
 
-    def convert_to_datetime_str(self, timestamp):
-        return str(datetime.fromtimestamp(timestamp))[:-3]
+#     def convert_to_datetime_str(self, timestamp):
+#         return str(datetime.fromtimestamp(timestamp))[:-3]
 
-    def convert_to_timestamp(self, datetime_string):
-        return datetime.fromisoformat(str(datetime_string)).replace(microsecond=0, second=0).timestamp()
+#     def convert_to_timestamp(self, datetime_string):
+#         return datetime.fromisoformat(str(datetime_string)).replace(microsecond=0, second=0).timestamp()
 
-    def __repr__(self):
-        return (f"{self.timestamp}, {self.selected_type}"
-                f", {self.selected_tags_list}, {self.content}"
-                f", {self.comment}")
+#     def __repr__(self):
+#         return (f"{self.timestamp}, {self.selected_type}"
+#                 f", {self.selected_tags_list}, {self.content}"
+#                 f", {self.comment}")
 
 
 # class Model():
