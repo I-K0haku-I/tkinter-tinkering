@@ -17,7 +17,7 @@ class DayOverviewController:
         self.load()
        
     def convert_note(self, note_dict):
-        # move convert logic to db_manager
+        # move convert logic to db_manager, duplicates with another method in note.py
         # TODO: make time return timestamp
         note_dict['time'] = datetime.strptime(note_dict['time'], "%Y-%m-%dT%H:%M:%SZ")
 
@@ -32,7 +32,24 @@ class DayOverviewController:
         note_list = self.db.notes.list().json()
         for note in note_list:
             self.convert_note(note)
-            self.note_list.append((note['time'], note['content'], note['types'], note['tags']))
+            self.note_list.append(self.get_note_values(note))
 
-    def get_selected_note_id(self):
-        return 3
+    def delete(self, index):
+        id = self.note_list.get_by(index)[4]
+        self.db.notes.destroy(id)
+
+    def get_selected_note_id(self, index):
+        return self.note_list.get_by(index)[4]  # very ugly
+    
+    def add_note(self, note):
+        self.convert_note(note)
+        self.note_list.append(self.get_note_values(note))
+        
+    def edit_note(self, note):
+        self.convert_note(note)
+        for i, val in enumerate(self.note_list.var.data):  # maybe enumerate or similar
+            if val[4] == note['id']:
+                self.note_list.set_by(i, self.get_note_values(note))
+
+    def get_note_values(self, note):
+        return (note['time'], note['content'], note['types'], note['tags'], note['id'])

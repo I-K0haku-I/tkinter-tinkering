@@ -9,6 +9,7 @@ class AddNotesView(tk.Frame):
     def __init__(self, parent, id=None):
         super().__init__(parent)
         self.parent = parent
+        self.on_save = lambda note: None
         self.controller = AddNotesAdapter(id)
         self.init_ui()
         self.controller.init_values()
@@ -78,5 +79,9 @@ class AddNotesView(tk.Frame):
             self.time_field.entry.config(bg='red')
 
     def save(self):
-        self.controller.store()
+        r = self.controller.store()
+        if not r.ok:
+            print("Could not save.")
+            return
+        self.on_save(r.json())
         self.parent.destroy()

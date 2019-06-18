@@ -13,7 +13,7 @@ class DayOverview(tk.Frame):
         self.controller = DayOverviewController()
 
         tree = BetterTreeview(self)
-        tree.set_headers((('time', 120), ('note', 250), ('type', 80), ('tags', 150)))
+        tree.set_headers((('time', 120), ('note', 350), ('type', 80), ('tags', 150)))
         tree.grid(row=0, column=0, sticky='nsew')
         tree.on_append_func = self.controller.note_list.append_without_event
         self.controller.note_list.on_append_func = tree.append_without_event
@@ -27,9 +27,12 @@ class DayOverview(tk.Frame):
         edit_btn = tk.Button(menu, text='Edit')
         edit_btn.config(command=self.create_edit_note)
         edit_btn.pack(side='top', fill='both')
-        test_add_btn = tk.Button(menu, text='Add Dummy')
-        test_add_btn.config(command=self.add_dummy)
-        test_add_btn.pack(side='top', fill='both')
+        refresh_btn = tk.Button(menu, text='Refresh')
+        refresh_btn.config(command=self.refresh_list)
+        refresh_btn.pack(side='top', fill='both')
+        refresh_btn = tk.Button(menu, text='Delete')
+        refresh_btn.config(command=self.delete_note)
+        refresh_btn.pack(side='top', fill='both')
 
         self.treeview = tree
         self.add_btn = add_btn
@@ -37,22 +40,40 @@ class DayOverview(tk.Frame):
 
         self.controller.init_values()
     
-    def add_dummy(self):
-        self.treeview.append(('test', 'te', '3', '523'))
+    def refresh_list(self):
+        for i in self.treeview.get_children():
+            self.treeview.delete(i)
+        self.controller.init_values()
 
     def create_add_note(self):
         new_window = tk.Toplevel(self)
         from .note_form import AddNotesView
         add_note = AddNotesView(new_window)
         add_note.pack(side='top', fill='both', expand=True)
+        add_note.on_save = self.controller.add_note
         
     def create_edit_note(self):
-        id = self.controller.get_selected_note_id()
+        item = self.treeview.focus()
+        if item is None:
+            return
+        index = self.treeview.index(item)
+        id = self.controller.get_selected_note_id(index)
+
+        # TODO: could refactor this and the above
         new_window = tk.Toplevel(self)
         from .note_form import AddNotesView
         add_note = AddNotesView(new_window, id=id)
         add_note.pack(side='top', fill='both', expand=True)
-        
+        add_note.on_save = self.controller.edit_note
+
+    def delete_note(self):
+        item = self.treeview.focus()
+        if item is None:
+            return
+        index = self.treeview.index(item)
+        self.treeview.delete(item)
+        self.controller.delete(index)
+
 
 class BetterTreeview(ttk.Treeview):
     def __init__(self, master=None, **kw):
@@ -68,8 +89,11 @@ class BetterTreeview(ttk.Treeview):
             self.heading(header, text=header, anchor='w')
             self.column(header, width=width)
 
-    def append_without_event(self, values):
+    def append_without_event(self, values, index=None):
         # attach to root, append to end, values is tuple of values to add
+        #hmmm
+        # if index is not None and index < len(self.get_children()):
+        #     self.delete(self.get_children()[index])
         self.insert('', 'end', value=values)    
 
     def append(self, values):  # TODO: add event for appending here

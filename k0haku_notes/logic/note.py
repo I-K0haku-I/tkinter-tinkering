@@ -63,7 +63,7 @@ class AddNotesAdapter:
 
     def store(self):
         note = NoteObject()
-        note.time = datetime.strftime(self.timestamp.get(), "%Y-%m-%dT%H:%M:%SZ")
+        note.time = datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
         note.content = self.content.get()
         note.detail = self.comment.get()
         note.types = [self.db_manager.get_type_id(self.selected_type.get())]

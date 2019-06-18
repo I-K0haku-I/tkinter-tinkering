@@ -65,9 +65,16 @@ class BaseModel:
 
 class ListBaseModel(BaseModel):  # might do some try blocks to make sure it's a list
     def __init__(self, init_value):
-        self.on_append_func = lambda value: None
+        self.on_append_func = lambda value, index=None: None
         super().__init__(init_value)
     
+    def get_by(self, index):  # maybe better with dunder methods
+        return self.var.data[index]
+    
+    def set_by(self, index, value):  # dunder
+        self.var.data[index] = value
+        # self.on_append_func(value, index)  # rename, weird now
+
     def append_without_event(self, value):
         self.var.data.append(value)
 
@@ -75,9 +82,13 @@ class ListBaseModel(BaseModel):  # might do some try blocks to make sure it's a 
         self.append_without_event(value)
         self.on_append_func(value)
 
+
 class TimeModel(BaseModel):
-    def get(self):
-        return self.datetime_to_str(self.var.get())
+    def get(self, as_string=True):
+        if as_string:
+            return self.datetime_to_str(self.var.get())
+        else:
+            return self.var.data
 
     def datetime_to_str(self, value):
         return str(value)[:-3]
