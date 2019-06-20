@@ -30,7 +30,8 @@ class AddNotesAdapter:
 
     def init_values(self):
         self.timestamp.set(datetime.now())
-        self.types_list.set(['test', 'test2'])
+        types_list = [type['name'] for type in self.db_manager.get_types(refresh=True)]
+        self.types_list.set(types_list)
 
         if self.id is not None:
             self.load()

@@ -22,8 +22,10 @@ class DBManager:
             self._tags = self.conn.tags.list().json()
         return self._tags
     
-    def get_types(self):
-        if self._types is None:
+    def get_types(self, refresh=False):
+        # I don't know if this is a good idea to optimize so much, I could just request new data every time
+        # maybe except if there is no connection?
+        if self._types is None or refresh:
             self._types = self.conn.types.list().json()
         return self._types
         
