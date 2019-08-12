@@ -41,47 +41,61 @@ class ListObservableVar(ObservableVar):
         self.data.append(value)
 
 
-class NoteObject(AsDictObject): # TODO: remember to update asdictobject in the other module
+class NoteObject(AsDictObject):  # TODO: remember to update asdictobject in the other module
     time = datetime.now().timestamp()
     content = 'Placeholder'
     detail = 'Placeholder'
-    types = []
+    type = []
     tags = []
 
 
 class BaseModel:
     def __init__(self, init_value):
         self.var = ObservableVar(init_value)
-    
+
     def get(self):
         return self.var.get()
-    
+
     def set(self, value):
         return self.var.set(value)
-    
+
     def on_change(self, func):
         self.var.add_callback(func)
 
 
 class ListBaseModel(BaseModel):  # might do some try blocks to make sure it's a list
     def __init__(self, init_value):
-        self.on_append_func = lambda value, index=None: None
+        self.on_add_item_func = lambda value, index=None: None
+        self.on_set_by_func = lambda index, value: None
+        self.on_move_item_func = lambda old_index, new_index: None
         super().__init__(init_value)
-    
+
     def get_by(self, index):  # maybe better with dunder methods
         return self.var.data[index]
-    
+
     def set_by(self, index, value):  # dunder
         self.var.data[index] = value
+        self.on_set_by_func(index, value)
         # self.on_append_func(value, index)  # rename, weird now
 
-    def append_without_event(self, value):
-        self.var.data.append(value)
+    def add_item_without_event(self, value, index=None):
+        if index:
+            self.var.data.insert(index, value)
+        else:
+            self.var.data.append(value)
 
-    def append(self, value):  # ugly?
-        self.append_without_event(value)
-        self.on_append_func(value)
+    def add_item(self, value, index=None):  # ugly?
+        self.add_item_without_event(value, index)
+        self.on_add_item_func(value, index)
 
+    def move_item(self, old_index, new_index):
+        if new_index > old_index:  # removing old_index will make the target position (new_index) different because whole list moves
+            new_index -= 1
+        self.var.data.insert(new_index, self.var.data.pop(old_index))
+        self.on_move_item_func(old_index, new_index)
+
+    def pop(self, index):  # might use getattr instead
+        self.var.data.pop(index)
 
 class TimeModel(BaseModel):
     def get(self, as_string=True):
@@ -92,7 +106,7 @@ class TimeModel(BaseModel):
 
     def datetime_to_str(self, value):
         return str(value)[:-3]
-    
+
     def set_string(self, iso_time, on_timestamp_validate=lambda is_validated: None):
         try:
             time = datetime.fromisoformat(str(iso_time)).replace(microsecond=0, second=0)
@@ -112,21 +126,21 @@ class SelectedTypeModel(BaseModel):
     pass
 
 
-class TypesListModel(ListBaseModel):
+class TypeListModel(ListBaseModel):
     pass
 
 
 class SelectedTagsListModel(ListBaseModel):
     def set_string(self, value):
+        if not value:
+            super().set([])
         new_tags_list = [tag.strip() for tag in value.split(',')]
         super().set(new_tags_list)
-    
-    def on_change(self, func):
-        def func_converted_as_comma_separated_str(value): 
-            func(','.join(value))
-        super().on_change(func_converted_as_comma_separated_str)
 
-    
+    def on_change(self, func):
+        def func_converted_as_comma_separated_str(value):
+            func(','.join(value) if value else [])
+        super().on_change(func_converted_as_comma_separated_str)
 
 
 class ContentModel(BaseModel):
@@ -167,7 +181,7 @@ class NoteListModel(ListBaseModel):
 #         # TODO: make time return timestamp
 #         # move convert logic to db_manager
 #         new_time = datetime.strptime(note_dict['time'], "%Y-%m-%dT%H:%M:%SZ").timestamp()
-#         self.timestamp.set(new_time) 
+#         self.timestamp.set(new_time)
 
 #         type_ids = note_dict['types']
 #         try:
@@ -178,7 +192,7 @@ class NoteListModel(ListBaseModel):
 
 #         tag_ids = note_dict['tags']
 #         self.selected_tags_list.set(self.db_manager.get_tags_by_ids(tag_ids))
-        
+
 #         content = note_dict['content']
 #         self.content.set(content)
 

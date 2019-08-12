@@ -10,7 +10,7 @@ class NoteObject(AsDictObject): # TODO: remember to update asdictobject in the o
     time = datetime.now().timestamp()
     content = 'Placeholder'
     detail = 'Placeholder'
-    types = []
+    type = ''
     tags = []
 
 
@@ -23,30 +23,18 @@ class AddNotesAdapter:
         
         self.timestamp = m.TimeModel(0)
         self.selected_type = m.SelectedTypeModel('')
-        self.types_list = m.TypesListModel([])
+        self.types_list = m.TypeListModel([])
         self.selected_tags_list = m.SelectedTagsListModel([])
         self.content = m.ContentModel('')
         self.comment = m.CommentModel('')
 
     def init_values(self):
         self.timestamp.set(datetime.now())
-        types_list = [type['name'] for type in self.db_manager.get_types(refresh=True)]
+        types_list = [type['name'] for type in self.db_manager.get_type(refresh=True)]
         self.types_list.set(types_list)
 
         if self.id is not None:
             self.load()
-    
-    def convert_note(self, note_dict):
-        # move convert logic to db_manager
-        # TODO: make time return timestamp
-        note_dict['time'] = datetime.strptime(note_dict['time'], "%Y-%m-%dT%H:%M:%SZ")
-
-        types = note_dict['types']
-        if types != []: 
-            note_dict['types'] = types[0] if isinstance(types, list) else types
-            note_dict['types'] = self.db_manager.get_type_by_id(note_dict['types'])['name']
-
-        note_dict['tags'] = self.db_manager.get_tags_by_ids(note_dict['tags'])
 
     def load(self):
         r = self.db_manager.notes.retrieve(self.id)
@@ -54,10 +42,10 @@ class AddNotesAdapter:
         if r.status_code != 200:
             return
         
-        self.convert_note(note_dict)
+        note_dict = self.db_manager.convert_note(note_dict)
 
-        self.timestamp.set(note_dict['time']) 
-        self.selected_type.set(note_dict['types'])
+        self.timestamp.set(note_dict['time'])
+        self.selected_type.set(note_dict['type'])
         self.selected_tags_list.set(note_dict['tags'])
         self.content.set(note_dict['content'])
         self.comment.set(note_dict['detail'])
@@ -67,13 +55,14 @@ class AddNotesAdapter:
         note.time = datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
         note.content = self.content.get()
         note.detail = self.comment.get()
-        note.types = [self.db_manager.get_type_id(self.selected_type.get())]
-        note.tags = self.db_manager.get_tags_ids(self.selected_tags_list.get())
+        note.type = self.db_manager.get_type_id(self.selected_type.get())
+        tags = self.selected_tags_list.get()
+        note.tags = self.db_manager.get_tags_ids([] if not tags or tags == [''] else tags)
 
         if self.id:
-            r = self.db_manager.notes.update(self.id, note)
+            r = self.db_manager.notes.update(self.id, json=note.as_dict())  # TODO: use json here instead of data to keep empty lists
         else:
-            r = self.db_manager.notes.create(note)
+            r = self.db_manager.notes.create(json=note.as_dict())
         return r
 
     # def init_values(self):
