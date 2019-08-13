@@ -6,7 +6,7 @@ from .widgets import AutoScrollbar, ScrollableFrame, TimeField, ComboboxField, E
 
 
 class AddNotesView(tk.Frame):
-    def __init__(self, parent, id=None):
+    def __init__(self, parent, id=None, time=None):
         super().__init__(parent)
         self.parent = parent
 
@@ -16,7 +16,7 @@ class AddNotesView(tk.Frame):
 
         self.controller = AddNotesAdapter(id)
         self.init_ui()
-        self.controller.init_values()
+        self.controller.init_values(time)
 
         self.content_field.entry.focus()
 

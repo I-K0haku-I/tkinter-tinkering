@@ -1,3 +1,5 @@
+import datetime
+
 import tkinter as tk
 from tkinter import ttk
 
@@ -9,12 +11,37 @@ class DayOverview(tk.Frame):
         super().__init__(parent)
         self.grid_columnconfigure(1, weight=1, minsize=70)
         self.grid_columnconfigure(0, weight=1, minsize=300)
+        self.grid_rowconfigure(0, weight=1, minsize=50)
 
         self.controller = DayOverviewController()
 
+        top_box = tk.Frame(self, background='red')
+        top_box.grid(row=0, column=0, sticky='nsew')
+
+        navigation = tk.Frame(top_box, background='blue')
+        navigation.pack(fill='both', expand=True)
+        # navigation.place(relx=0.5, rely=0.5, anchor='center')
+
+        left_btn = tk.Button(navigation, text='<-')
+        left_btn.pack(side='left', expand=True, fill='both')
+        left_btn.config(command=self.controller.prev_day, font=("Courier", 20))
+
+        date_var = tk.StringVar()
+        date_var.set('TESTSS')
+        date_var.trace_add('write', lambda *args: self.controller.date.set_string(date_var.get()))
+        self.controller.date.on_change(lambda data: date_var.set(data))
+
+        date_lbl = tk.Label(navigation, textvariable=date_var, width=20)
+        date_lbl.pack(side='left', expand=True, fill='both')
+        date_lbl.config(font=('Courier', 15))
+
+        right_btn = tk.Button(navigation, text='->')
+        right_btn.pack(side='left', expand=True, fill='both')
+        right_btn.config(command=self.controller.next_day, font=("Courier", 20))
+
         tree = BetterTreeview(self)
         tree.set_headers((('time', 120), ('note', 350), ('type', 80), ('tags', 150)))
-        tree.grid(row=0, column=0, sticky='nsew')
+        tree.grid(row=1, column=0, sticky='nsew')
         tree.bind('<Double-1>', lambda event: self.create_edit_note())
         tree.on_add_item_func = self.controller.note_list.add_item_without_event
         self.controller.note_list.on_add_item_func = tree.add_item_without_event
@@ -23,7 +50,7 @@ class DayOverview(tk.Frame):
 
         # Frame of buttons
         menu = tk.Frame(self, width=100)
-        menu.grid(row=0, column=1, sticky='nsew')
+        menu.grid(row=1, column=1, sticky='nsew')
 
         add_btn = tk.Button(menu, text='Add')
         add_btn.config(command=self.create_add_note)
@@ -38,30 +65,33 @@ class DayOverview(tk.Frame):
         delete_btn.pack(side='top', fill='both')
 
         refresh_btn = tk.Button(menu, text='Refresh')
-        refresh_btn.config(command=self.refresh_list)
+        refresh_btn.config(command=self.controller.init_values)
         refresh_btn.pack(side='top', fill='both')
 
         self.treeview = tree
         self.add_btn = add_btn
         self.edit_btn = edit_btn
 
+        self.controller.clear_list_func = self.clear_list
         self.controller.init_values()
 
-    def refresh_list(self):
+    def clear_list(self):
         for i in self.treeview.get_children():
             self.treeview.delete(i)
-        self.controller.init_values()
 
-    def create_note_popup(self, id=None, on_store_data=lambda note: None):
+    def create_note_popup(self, id=None, on_store_data=lambda note: None, time=None):
         new_window = tk.Toplevel(self)
         from .note_form import AddNotesView
-        add_note = AddNotesView(new_window, id=id)
-        # add_note.save_callbacks.append(self.refresh_list)
+        add_note = AddNotesView(new_window, id=id, time=time)
         add_note.pack(side='top', fill='both', expand=True)
         add_note.on_store_data = on_store_data
 
     def create_add_note(self):
-        self.create_note_popup(on_store_data=self.controller.add_note)
+        if self.controller.date.get(as_string=False) == datetime.date.today():
+            time_to_use = datetime.datetime.now()
+        else:
+            time_to_use = datetime.datetime.combine(self.controller.date.get(as_string=False), datetime.datetime.min.time())
+        self.create_note_popup(on_store_data=self.controller.add_note, time=time_to_use)
 
     def create_edit_note(self):
         item = self.treeview.focus()
@@ -79,6 +109,10 @@ class DayOverview(tk.Frame):
         if self.controller.delete(index):
             self.treeview.delete(item)
         # print([self.treeview.item(i, 'values')[4] for i in self.treeview.get_children()], '\n', [n[4] for n in self.controller.note_list.get()])
+
+
+class Navigation():
+    pass
 
 
 class BetterTreeview(ttk.Treeview):

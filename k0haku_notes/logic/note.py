@@ -28,8 +28,8 @@ class AddNotesAdapter:
         self.content = m.ContentModel('')
         self.comment = m.CommentModel('')
 
-    def init_values(self):
-        self.timestamp.set(datetime.now())
+    def init_values(self, time=None):
+        self.timestamp.set(datetime.now() if time is None else time)
         types_list = [type['name'] for type in self.db_manager.get_type(refresh=True)]
         self.types_list.set(types_list)
 

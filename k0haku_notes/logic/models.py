@@ -1,5 +1,5 @@
 import tkinter as tk
-from datetime import datetime
+from datetime import datetime, date
 
 from base_api_connector import AsDictObject
 from utils.db_manager import get_db_manager
@@ -121,6 +121,19 @@ class TimeModel(BaseModel):
             func(value)
         super().on_change(func_with_value_as_str)
 
+class DateModel(BaseModel):
+    def get(self, as_string=True):
+        if as_string:
+            return str(self.var.get())
+        else:
+            return self.var.data
+    
+    def set_string(self, iso_time):
+        try:
+            date_to_set = date.fromisoformat(str(iso_time))
+            super().set(date_to_set)
+        except:
+            print('Could not convert time str to date:', iso_time)
 
 class SelectedTypeModel(BaseModel):
     pass
