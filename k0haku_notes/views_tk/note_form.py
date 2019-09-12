@@ -1,3 +1,4 @@
+import asyncio
 import tkinter as tk
 from tkinter import ttk
 
@@ -11,8 +12,8 @@ class AddNotesView(tk.Frame):
         self.parent = parent
 
         self.on_store_data = lambda note: None
-        self.save_callbacks = []
-        self.save_callbacks.append(self.store_data)
+        # self.save_callbacks = []
+        # self.save_callbacks.append(self.store_data)
 
         self.controller = AddNotesAdapter(id)
         self.init_ui()
@@ -84,13 +85,15 @@ class AddNotesView(tk.Frame):
             self.time_field.entry.config(bg='red')
 
     def save(self):
-        for call in self.save_callbacks:
-            call()
+        # for call in self.save_callbacks:
+        #     call()
+        self.store_data()
         self.parent.destroy()
 
     def store_data(self):
-        r = self.controller.store()
-        if not r.ok:
-            print("Could not save.")
-            return
-        self.on_store_data(r.json())
+        asyncio.ensure_future(self.store_data_async())
+
+    async def store_data_async(self):
+        new_data = await self.controller.store_async()
+        print(new_data)
+        self.on_store_data(new_data)

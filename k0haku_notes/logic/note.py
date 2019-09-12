@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 from base_api_connector import AsDictObject
@@ -30,16 +31,20 @@ class AddNotesAdapter:
 
     def init_values(self, time=None):
         self.timestamp.set(datetime.now() if time is None else time)
-        types_list = [type['name'] for type in self.db_manager.get_type(refresh=True)]
+        types_list = [type['name'] for type in self.db_manager.get_type()]
         self.types_list.set(types_list)
 
         if self.id is not None:
             self.load()
 
     def load(self):
-        r = self.db_manager.notes.retrieve(self.id)
-        note_dict = r.json()
-        if r.status_code != 200:
+        asyncio.ensure_future(self.load_async())
+
+    async def load_async(self):
+        r = await self.db_manager.notes.retrieve(self.id)
+        note_dict = await r.json()
+        if r.status != 200:
+            print(f'Couldn\' load when retreiving {self.id}')
             return
         
         note_dict = self.db_manager.convert_note(note_dict)
@@ -51,6 +56,29 @@ class AddNotesAdapter:
         self.comment.set(note_dict['detail'])
 
     def store(self):
+        asyncio.ensure_future(self.store_async())
+    
+    async def store_async(self):
+        note = NoteObject()
+        note.time = datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
+        note.content = self.content.get()
+        note.detail = self.comment.get()
+        note.type = self.db_manager.get_type_id(self.selected_type.get())
+        tags = self.selected_tags_list.get()
+        note.tags = self.db_manager.get_tags_ids([] if not tags or tags == [''] else tags)
+
+        if self.id:
+            r = await self.db_manager.notes.update(self.id, json=note.as_dict())
+        else:
+            r = await self.db_manager.notes.create(json=note.as_dict())
+        if r.status not in (200, 201):
+            print(f"Could not save: {r.reason}. Status code: {r.status}")
+            return
+        data = await r.json()
+        return data
+    
+
+    def store_normal(self):
         note = NoteObject()
         note.time = datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
         note.content = self.content.get()

@@ -1,4 +1,5 @@
 import tkinter as tk
+import asyncio
 from tkinter import ttk
 from .widgets import FrameHolder
 
@@ -16,10 +17,20 @@ class RootNotesApp:
 
         self.main_window = main_window
         self.main_frame = day_overview_frame
-
+    
     def start(self):
+        asyncio.run(self.run_tk())
 
-        self.main_window.mainloop()
+    async def run_tk(self):
+        self.main_frame.controller.init_values()
+        try:
+            while True:
+                self.main_window.update()
+                await asyncio.sleep(0.05)
+        except tk.TclError as e:
+            if 'application has been destroyed' not in e.args[0]:
+                raise
+        # self.main_window.mainloop()
 
 
 

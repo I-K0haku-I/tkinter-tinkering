@@ -11,7 +11,7 @@ class DayOverview(tk.Frame):
         super().__init__(parent)
         self.grid_columnconfigure(1, weight=1, minsize=70)
         self.grid_columnconfigure(0, weight=1, minsize=300)
-        self.grid_rowconfigure(0, weight=1, minsize=50)
+        self.grid_rowconfigure(0, weight=1, minsize=40)
 
         self.controller = DayOverviewController()
 
@@ -24,7 +24,7 @@ class DayOverview(tk.Frame):
 
         left_btn = tk.Button(navigation, text='<-')
         left_btn.pack(side='left', expand=True, fill='both')
-        left_btn.config(command=self.controller.prev_day, font=("Courier", 20))
+        left_btn.config(command=self.controller.prev_day, font=("Courier", 15))
 
         date_var = tk.StringVar()
         date_var.set('TESTSS')
@@ -37,7 +37,7 @@ class DayOverview(tk.Frame):
 
         right_btn = tk.Button(navigation, text='->')
         right_btn.pack(side='left', expand=True, fill='both')
-        right_btn.config(command=self.controller.next_day, font=("Courier", 20))
+        right_btn.config(command=self.controller.next_day, font=("Courier", 15))
 
         tree = BetterTreeview(self)
         tree.set_headers((('time', 120), ('note', 350), ('type', 80), ('tags', 150)))
@@ -65,7 +65,7 @@ class DayOverview(tk.Frame):
         delete_btn.pack(side='top', fill='both')
 
         refresh_btn = tk.Button(menu, text='Refresh')
-        refresh_btn.config(command=self.controller.init_values)
+        refresh_btn.config(command=self.controller.refresh)
         refresh_btn.pack(side='top', fill='both')
 
         self.treeview = tree
@@ -73,7 +73,7 @@ class DayOverview(tk.Frame):
         self.edit_btn = edit_btn
 
         self.controller.clear_list_func = self.clear_list
-        self.controller.init_values()
+        # self.controller.init_values(async_mode=True)
 
     def clear_list(self):
         for i in self.treeview.get_children():
