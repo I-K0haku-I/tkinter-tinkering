@@ -38,7 +38,7 @@ class AddNotesAdapter:
             self.load()
 
     def load(self):
-        asyncio.ensure_future(self.load_async())
+        asyncio.create_task(self.load_async())
 
     async def load_async(self):
         r = await self.db_manager.notes.retrieve(self.id)
@@ -56,14 +56,15 @@ class AddNotesAdapter:
         self.comment.set(note_dict['detail'])
 
     def store(self):
-        asyncio.ensure_future(self.store_async())
+        asyncio.create_task(self.store_async())
     
     async def store_async(self):
         note = NoteObject()
         note.time = datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
         note.content = self.content.get()
         note.detail = self.comment.get()
-        note.type = self.db_manager.get_type_id(self.selected_type.get())
+        note.type = await self.db_manager.get_type_id_async(self.selected_type.get())
+        print(note.type)
         tags = self.selected_tags_list.get()
         note.tags = self.db_manager.get_tags_ids([] if not tags or tags == [''] else tags)
 

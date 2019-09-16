@@ -20,11 +20,11 @@ class DayOverviewController:
         # self.db.get_tags(refresh=True)
         # self.db.get_type(refresh=True)
         self.date.set(date.today())
-        self.load_note_list()
         self.load_other()
+        self.load_note_list()
     
     def load_other(self):
-        asyncio.ensure_future(self.db.load_types())
+        asyncio.create_task(self.db.load_types())
 
     def refresh(self):
         self.cached_dates.pop(self.date.get(), None)
@@ -33,7 +33,7 @@ class DayOverviewController:
     def load_note_list(self):
         if self.date.get() not in self.cached_dates.keys():
             self.cached_dates[self.date.get()] = None
-            asyncio.ensure_future(self.load_note_list_async())  # might give in date
+            asyncio.create_task(self.load_note_list_async())  # might give in date
             return
 
         if self.cached_dates[self.date.get()] is None:  # currently retreiving data so should not do anything
@@ -78,13 +78,15 @@ class DayOverviewController:
         self.load_note_list()
 
     def delete(self, index):
-        return asyncio.ensure_future(self.delete_async(index))
+        return asyncio.create_task(self.delete_async(index))
 
     async def delete_async(self, index):
         id = self.note_list.get_by(index)[4]
         r = await self.db.notes.destroy(id)
         if r.status in (204,):
-            self.note_list.pop(index)
+            note = self.note_list.pop(index)
+            date = note[0].strftime('%Y-%m-%d')
+            del self.cached_dates[date][index]
             return True
         return False
 
@@ -123,7 +125,10 @@ class DayOverviewController:
             if val[4] == note['id']:
                 self.note_list.set_by(i, self.convert_to_values(note))
                 self.note_list.move_item(i, self.get_new_pos(note))
+                date = note['time'].strftime('%Y-%m-%d')
+                self.cached_dates[date][i] = note
                 break
+        
 
     def convert_to_values(self, note):
         return (note['time'], note['content'], note['type'], note['tags'], note['id'])

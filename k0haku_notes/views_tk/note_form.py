@@ -91,7 +91,7 @@ class AddNotesView(tk.Frame):
         self.parent.destroy()
 
     def store_data(self):
-        asyncio.ensure_future(self.store_data_async())
+        asyncio.create_task(self.store_data_async())
 
     async def store_data_async(self):
         new_data = await self.controller.store_async()

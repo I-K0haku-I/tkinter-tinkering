@@ -25,6 +25,7 @@ class DBManager:
         self.conn = NotesDBConnector()
         self._tags = None
         self._types = None
+        self.is_getting_types = False
 
     def get_tags(self, refresh=False):
         if self._tags is None or refresh or not USE_CACHE:
@@ -32,20 +33,27 @@ class DBManager:
         return self._tags
 
     async def load_types(self):
+        self.is_getting_types = True
         r = await self.types.list()
         data = await r.json()
         self._types = data
+        self.is_getting_types = False
 
     def get_type(self, refresh=False):
         # I don't know if this is a good idea to optimize so much, I could just request new data every time
         # maybe except if there is no connection?
         if self._types is None or refresh or not USE_CACHE:
-            asyncio.ensure_future(self.load_types())
+            asyncio.create_task(self.load_types())
             # await self.load_types()
             # loop = asyncio.get_event_loop()
             # if loop.create_task
             # .run_until_complete(self.load_types())
             # self._types = self.types.list().json()
+        return self._types
+    
+    async def get_type_async(self):
+        if self._types is None:
+            self._types = await self.load_types()
         return self._types
 
     def get_type_by_id(self, id):
@@ -56,12 +64,22 @@ class DBManager:
     def get_type_id(self, type_str):
         if not type_str:
             return ''
-
+        
         for type in self.get_type():
             if type['name'] == type_str:
                 return type['id']
         else:
-            asyncio.ensure_future(self.save_type(type_str))
+            return asyncio.create_task(self.save_type(type_str))
+
+    async def get_type_id_async(self, type_str):
+        if not type_str:
+            return ''
+        type_lst = await self.get_type_async()
+        for type in type_lst:
+            if type['name'] == type_str:
+                return type['id']
+        else:
+            return await self.save_type(type_str)
 
     async def save_type(self, type_str):
         r = await self.types.create(dict(name=type_str))

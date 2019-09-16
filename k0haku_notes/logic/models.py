@@ -95,7 +95,7 @@ class ListBaseModel(BaseModel):  # might do some try blocks to make sure it's a 
         self.on_move_item_func(old_index, new_index)
 
     def pop(self, index):  # might use getattr instead
-        self.var.data.pop(index)
+        return self.var.data.pop(index)
 
 class TimeModel(BaseModel):
     def get(self, as_string=True):
