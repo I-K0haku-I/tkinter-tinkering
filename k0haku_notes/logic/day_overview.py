@@ -119,7 +119,6 @@ class DayOverviewController:
         # self.note_list.add_item(self.convert_to_values(new_note), index=new_index)
 
     def edit_note(self, note):
-        print(note)
         note = self.db.convert_note(note)
         for i, val in enumerate(self.note_list.var.data):
             if val[4] == note['id']:

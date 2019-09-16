@@ -64,7 +64,6 @@ class AddNotesAdapter:
         note.content = self.content.get()
         note.detail = self.comment.get()
         note.type = await self.db_manager.get_type_id_async(self.selected_type.get())
-        print(note.type)
         tags = self.selected_tags_list.get()
         note.tags = self.db_manager.get_tags_ids([] if not tags or tags == [''] else tags)
 

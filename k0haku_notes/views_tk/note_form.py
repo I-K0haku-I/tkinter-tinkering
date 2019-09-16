@@ -95,5 +95,4 @@ class AddNotesView(tk.Frame):
 
     async def store_data_async(self):
         new_data = await self.controller.store_async()
-        print(new_data)
         self.on_store_data(new_data)
