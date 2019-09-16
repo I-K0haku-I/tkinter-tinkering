@@ -9,9 +9,10 @@ from logic.day_overview import DayOverviewController
 class DayOverview(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.grid_columnconfigure(1, weight=1, minsize=70)
         self.grid_columnconfigure(0, weight=1, minsize=300)
-        self.grid_rowconfigure(0, weight=1, minsize=40)
+        self.grid_columnconfigure(1, weight=0, minsize=150)
+        self.grid_rowconfigure(0, weight=0, minsize=70)
+        self.grid_rowconfigure(1, weight=1, minsize=350)
 
         self.controller = DayOverviewController()
 
@@ -52,21 +53,23 @@ class DayOverview(tk.Frame):
         menu = tk.Frame(self, width=100)
         menu.grid(row=1, column=1, sticky='nsew')
 
+        button_kwargs = dict(ipady=31, ipadx=50)
+
         add_btn = tk.Button(menu, text='Add')
         add_btn.config(command=self.create_add_note)
-        add_btn.pack(side='top', fill='both')
+        add_btn.pack(side='top', fill='both', **button_kwargs)
 
         edit_btn = tk.Button(menu, text='Edit')
         edit_btn.config(command=self.create_edit_note)
-        edit_btn.pack(side='top', fill='both')
+        edit_btn.pack(side='top', fill='both', **button_kwargs)
 
         delete_btn = tk.Button(menu, text='Delete')
         delete_btn.config(command=self.delete_note)
-        delete_btn.pack(side='top', fill='both')
+        delete_btn.pack(side='top', fill='both', **button_kwargs)
 
         refresh_btn = tk.Button(menu, text='Refresh')
         refresh_btn.config(command=self.controller.refresh)
-        refresh_btn.pack(side='top', fill='both')
+        refresh_btn.pack(side='top', fill='both', **button_kwargs)
 
         self.treeview = tree
         self.add_btn = add_btn
