@@ -129,7 +129,10 @@ class DBManager:
         new_note_dict = note_dict.copy()
 
         new_note_dict['time'] = datetime.strptime(new_note_dict['time'], "%Y-%m-%dT%H:%M:%SZ")
-        new_note_dict['type'] = self.get_type_by_id(new_note_dict['type']) if new_note_dict['type'] else ''
+        try:
+            new_note_dict['type'] = self.get_type_by_id(new_note_dict['type']) if new_note_dict['type'] else ''
+        except TypeError:
+            new_note_dict['type'] = 'Refresh please.'
         new_note_dict['tags'] = self.get_tags_by_ids(new_note_dict['tags'])
 
         return new_note_dict
