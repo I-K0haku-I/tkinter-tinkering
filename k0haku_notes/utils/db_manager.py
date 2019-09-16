@@ -2,17 +2,17 @@ from datetime import datetime
 
 import asyncio
 
-from base_api_connector import GenericAPIConnector, APIResource, AsyncCommandsMethodHolder
+from base_api_connector import GenericAPIConnector, APIResource
 
 
 class NotesDBConnector(GenericAPIConnector):
     # base_api_url = 'http://127.0.0.1:8000/notes-backend/'
     base_api_url = 'https://k0haku.pythonanywhere.com/notes-backend/'
     # base_api_url = 'http://notes.k0haku.space/'
-    notes = APIResource('all', method_holder=AsyncCommandsMethodHolder)
+    notes = APIResource('all', is_async=True)
     # notes = APIResource('all')
     tags = APIResource('all')
-    types = APIResource('all', method_holder=AsyncCommandsMethodHolder)
+    types = APIResource('all', is_async=True)
 
 
 db_manager_singleton = None
