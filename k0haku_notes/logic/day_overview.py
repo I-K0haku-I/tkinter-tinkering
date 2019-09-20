@@ -53,6 +53,12 @@ class DayOverviewController:
     async def load_note_list_async(self):
         date = self.date.get()
         new_note_list_resp = await self.db.notes.list(params={'date': date})
+        if new_note_list_resp.content_type != 'application/json':
+            print(f'Error: Status code: {new_note_list_resp.status}')
+            print('This is the body:')
+            print(await new_note_list_resp.text())
+            print('Skipping...')
+            return
         new_note_list = await new_note_list_resp.json()
         new_note_list = [self.db.convert_note(note) for note in new_note_list]
         new_note_list.sort(key=lambda x: x['time'])
