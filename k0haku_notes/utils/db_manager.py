@@ -3,11 +3,13 @@ from datetime import datetime
 import asyncio
 
 from base_api_connector import GenericAPIConnector, APIResource
+from utils.config import config
 
 
 class NotesDBConnector(GenericAPIConnector):
+    base_headers = {'cool-token': config['API']['pass']}
     # base_api_url = 'http://127.0.0.1:8000/notes-backend/'
-    base_api_url = 'https://k0haku.pythonanywhere.com/notes-backend/'
+    base_api_url = config['API']['url']
     # base_api_url = 'http://notes.k0haku.space/'
     notes = APIResource('all', is_async=True)
     # notes = APIResource('all')
@@ -35,6 +37,13 @@ class DBManager:
     async def load_types(self):
         self.is_getting_types = True
         r = await self.types.list()
+        if r.status != 200:
+            print(f'Error: Status code: {r.status}.')
+            print('This is the body:')
+            print(await r.text())
+            print('Skipping...')
+            data = None
+            return
         data = await r.json()
         self._types = data
         self.is_getting_types = False

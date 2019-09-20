@@ -108,6 +108,7 @@ venv.bak/
 pypi-instructions
 
 # exclude
+config.ini
 testing.py
 testing2.py
 testing3.py

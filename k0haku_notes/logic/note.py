@@ -68,9 +68,9 @@ class AddNotesAdapter:
         note.tags = self.db_manager.get_tags_ids([] if not tags or tags == [''] else tags)
 
         if self.id:
-            r = await self.db_manager.notes.update(self.id, json=note.as_dict())
+            r = await self.db_manager.notes.update(self.id, note.as_dict())
         else:
-            r = await self.db_manager.notes.create(json=note.as_dict())
+            r = await self.db_manager.notes.create(note.as_dict())
         if r.status not in (200, 201):
             print(f"Could not save: {r.reason}. Status code: {r.status}")
             return
@@ -88,9 +88,9 @@ class AddNotesAdapter:
         note.tags = self.db_manager.get_tags_ids([] if not tags or tags == [''] else tags)
 
         if self.id:
-            r = self.db_manager.notes.update(self.id, json=note.as_dict())  # TODO: use json here instead of data to keep empty lists
+            r = self.db_manager.notes.update(self.id, note.as_dict())  # TODO: use json here instead of data to keep empty lists
         else:
-            r = self.db_manager.notes.create(json=note.as_dict())
+            r = self.db_manager.notes.create(note.as_dict())
         return r
 
     # def init_values(self):
