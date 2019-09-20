@@ -28,7 +28,8 @@ class AddNotesView(tk.Frame):
 
         self.main_frame = ScrollableFrame(self, self.scrollbar)
         self.main_frame.grid(row=0, column=0, sticky='nsew')
-        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1, minsize=500)
+        self.grid_rowconfigure(1, weight=0, minsize=100)
         self.grid_columnconfigure(0, weight=1)
 
         self.content_field = EntryField(self.main_frame, label_text='Content:')
@@ -77,7 +78,7 @@ class AddNotesView(tk.Frame):
 
         self.savebtn = ttk.Button(self, text='Save')
         self.savebtn.grid(row=1, column=0, columnspan=2, sticky='nswe')
-        self.grid_rowconfigure(1, minsize=50)
+        # self.grid_rowconfigure(1, minsize=100)
         self.savebtn.config(command=self.save)
 
         # self.closebtn = ttk.Button(self.buttons_down, text='Close')

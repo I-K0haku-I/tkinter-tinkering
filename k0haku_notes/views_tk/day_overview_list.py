@@ -9,7 +9,7 @@ from logic.day_overview import DayOverviewController
 class DayOverview(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.grid_columnconfigure(0, weight=1, minsize=300)
+        self.grid_columnconfigure(0, weight=1, minsize=1000)
         self.grid_columnconfigure(1, weight=0, minsize=150)
         self.grid_rowconfigure(0, weight=0, minsize=70)
         self.grid_rowconfigure(1, weight=1, minsize=350)
