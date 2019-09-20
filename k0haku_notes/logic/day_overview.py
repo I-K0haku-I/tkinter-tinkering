@@ -6,12 +6,14 @@ from utils.db_manager import get_db_manager
 
 import logic.models as m
 
+ID_POS_IN_TUPLE = 6
 
 class DayOverviewController:
     def __init__(self):
         self.db = get_db_manager()
         self.cached_dates = {}
         self.clear_list_func = lambda: None
+        self.header = (('time', 0.15), ('note', 0.425), ('duration', 0.075), ('unit', 0.0625), ('type', 0.1), ('tags', 0.1875))
 
         self.note_list = m.NoteListModel([])
         self.date = m.DateModel(0)
@@ -87,7 +89,7 @@ class DayOverviewController:
         return asyncio.create_task(self.delete_async(index))
 
     async def delete_async(self, index):
-        id = self.note_list.get_by(index)[4]
+        id = self.note_list.get_by(index)[ID_POS_IN_TUPLE]
         r = await self.db.notes.destroy(id)
         if r.status in (204,):
             note = self.note_list.pop(index)
@@ -101,7 +103,7 @@ class DayOverviewController:
         self.note_list.set([])
 
     def get_selected_note_id(self, index):
-        return self.note_list.get_by(index)[4]  # very ugly, magic numbers could be removed to solve it
+        return self.note_list.get_by(index)[ID_POS_IN_TUPLE]  # very ugly, magic numbers could be removed to solve it
 
     def get_new_pos(self, new_note):
         i = -1
@@ -126,14 +128,19 @@ class DayOverviewController:
 
     def edit_note(self, note):
         note = self.db.convert_note(note)
+          # looks at this, we are directly accessing the var.data here
+          # it would be better if it could access the class and iterate over it directly
+          # it would be better overall, if we would access it not by id but by some other more clear interface too
+          # below we would not need to convert the note to values like that for example.
         for i, val in enumerate(self.note_list.var.data):
-            if val[4] == note['id']:
+            if val[ID_POS_IN_TUPLE] == note['id']:
                 self.note_list.set_by(i, self.convert_to_values(note))
                 self.note_list.move_item(i, self.get_new_pos(note))
                 date = note['time'].strftime('%Y-%m-%d')
                 self.cached_dates[date][i] = note
                 break
-        
 
     def convert_to_values(self, note):
-        return (note['time'], note['content'], note['type'], note['tags'], note['id'])
+        duration = m.DurationModel(note['duration']).to_simple_str()
+        duration_unit = 'HOURS' if '.' in duration else 'MINS'
+        return (note['time'], note['content'], duration, duration_unit, note['type'], note['tags'], note['id'])

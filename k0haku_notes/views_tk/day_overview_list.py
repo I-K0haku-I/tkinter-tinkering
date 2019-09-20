@@ -41,7 +41,8 @@ class DayOverview(tk.Frame):
         right_btn.config(command=self.controller.next_day, font=("Courier", 15))
 
         tree = BetterTreeview(self)
-        tree.set_headers((('time', 120), ('note', 350), ('type', 80), ('tags', 150)))
+        headers = tuple((name, int(ratio * 800)) for name, ratio in self.controller.header)
+        tree.set_headers(headers)
         tree.grid(row=1, column=0, sticky='nsew')
         tree.bind('<Double-1>', lambda event: self.create_edit_note())
         tree.on_add_item_func = self.controller.note_list.add_item_without_event

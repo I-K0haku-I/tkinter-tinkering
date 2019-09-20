@@ -131,7 +131,9 @@ class DurationModel(BaseModel):
         else:
             return self.var.data
 
-    def to_simple_str(self, time):
+    def to_simple_str(self, time=None):
+        if time is None:
+            time = self.var.get()
         hour = time.hour
         minute = time.minute
         if hour == 0:
