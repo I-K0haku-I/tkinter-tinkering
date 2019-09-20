@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime as dt
 
 import asyncio
 
@@ -8,11 +8,8 @@ from utils.config import config
 
 class NotesDBConnector(GenericAPIConnector):
     base_headers = {'cool-token': config['API']['pass']}
-    # base_api_url = 'http://127.0.0.1:8000/notes-backend/'
     base_api_url = config['API']['url']
-    # base_api_url = 'http://notes.k0haku.space/'
     notes = APIResource('all', is_async=True)
-    # notes = APIResource('all')
     tags = APIResource('all')
     types = APIResource('all', is_async=True)
 
@@ -137,7 +134,8 @@ class DBManager:
         # TODO: make time return timestamp
         new_note_dict = note_dict.copy()
 
-        new_note_dict['time'] = datetime.strptime(new_note_dict['time'], "%Y-%m-%dT%H:%M:%SZ")
+        new_note_dict['time'] = dt.datetime.strptime(new_note_dict['time'], "%Y-%m-%dT%H:%M:%SZ")
+        new_note_dict['duration'] = dt.datetime.strptime(new_note_dict['duration'], "%H:%M:%S").time()
         try:
             new_note_dict['type'] = self.get_type_by_id(new_note_dict['type']) if new_note_dict['type'] else ''
         except TypeError:

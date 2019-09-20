@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+import datetime as dt
 
 from base_api_connector import AsDictObject
 from utils.db_manager import get_db_manager
@@ -8,7 +8,8 @@ import logic.models as m
 
 
 class NoteObject(AsDictObject): # TODO: remember to update asdictobject in the other module
-    time = datetime.now().timestamp()
+    time = dt.datetime.now().timestamp()
+    duration = str(dt.time())
     content = 'Placeholder'
     detail = 'Placeholder'
     type = ''
@@ -23,6 +24,7 @@ class AddNotesAdapter:
         # self.on_timestamp_validate = lambda bool: None
         
         self.timestamp = m.TimeModel(0)
+        self.duration = m.DurationModel(0)
         self.selected_type = m.SelectedTypeModel('')
         self.types_list = m.TypeListModel([])
         self.selected_tags_list = m.SelectedTagsListModel([])
@@ -30,7 +32,8 @@ class AddNotesAdapter:
         self.comment = m.CommentModel('')
 
     def init_values(self, time=None):
-        self.timestamp.set(datetime.now() if time is None else time)
+        self.timestamp.set(dt.datetime.now() if time is None else time)
+        self.duration.set(dt.time())
         types_list = [type['name'] for type in self.db_manager.get_type()]
         self.types_list.set(types_list)
 
@@ -50,6 +53,7 @@ class AddNotesAdapter:
         note_dict = self.db_manager.convert_note(note_dict)
 
         self.timestamp.set(note_dict['time'])
+        self.duration.set(note_dict['duration'])
         self.selected_type.set(note_dict['type'])
         self.selected_tags_list.set(note_dict['tags'])
         self.content.set(note_dict['content'])
@@ -59,8 +63,10 @@ class AddNotesAdapter:
         asyncio.create_task(self.store_async())
     
     async def store_async(self):
+        # ideally, I would not need this, the note data should already be correct and I just have to iterate and get their value
         note = NoteObject()
-        note.time = datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
+        note.time = dt.datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
+        note.duration = self.duration.get()
         note.content = self.content.get()
         note.detail = self.comment.get()
         note.type = await self.db_manager.get_type_id_async(self.selected_type.get())
@@ -80,7 +86,7 @@ class AddNotesAdapter:
 
     def store_normal(self):
         note = NoteObject()
-        note.time = datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
+        note.time = dt.datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
         note.content = self.content.get()
         note.detail = self.comment.get()
         note.type = self.db_manager.get_type_id(self.selected_type.get())

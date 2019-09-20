@@ -1,3 +1,4 @@
+import functools
 import asyncio
 import tkinter as tk
 from tkinter import ttk
@@ -38,8 +39,13 @@ class AddNotesView(tk.Frame):
 
         self.time_field = EntryField(self.main_frame, label_text='Time:')
         self.time_field.pack(side='top', fill='both', expand=True)
-        self.time_field.on_write(lambda val: self.controller.timestamp.set_string(val, self.set_time_color))
+        self.time_field.on_write(lambda val: self.controller.timestamp.set_string(val, self.get_color_func(self.time_field.entry)))
         self.controller.timestamp.on_change(self.time_field.set_var)
+
+        self.duration_field = EntryField(self.main_frame, label_text='Duration:')
+        self.duration_field.pack(side='top', fill='both', expand=True)
+        self.duration_field.on_write(lambda val: self.controller.duration.set_string(val, self.get_color_func(self.duration_field.entry)))
+        self.controller.duration.on_change(self.duration_field.set_var)
 
         self.type_field = ComboboxField(self.main_frame, label_text='Type:')
         self.type_field.pack(side='top', fill='both', expand=True)
@@ -77,12 +83,15 @@ class AddNotesView(tk.Frame):
         # self.closebtn = ttk.Button(self.buttons_down, text='Close')
         # self.closebtn.grid(row=0, column=2, sticky='nswe')
         # self.closebtn.config(command=self.destroy)
+    
+    def get_color_func(self, elem):
+        return functools.partial(self.set_color, elem)
 
-    def set_time_color(self, is_valid):
+    def set_color(self, elem, is_valid):
         if is_valid:
-            self.time_field.entry.config(bg='white')
+            elem.config(bg='white')
         else:
-            self.time_field.entry.config(bg='red')
+            elem.config(bg='red')
 
     def save(self):
         # for call in self.save_callbacks:

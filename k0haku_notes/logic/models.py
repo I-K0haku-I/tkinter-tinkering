@@ -1,5 +1,6 @@
+import re
 import tkinter as tk
-from datetime import datetime, date
+import datetime as dt
 
 from base_api_connector import AsDictObject
 from utils.db_manager import get_db_manager
@@ -42,7 +43,7 @@ class ListObservableVar(ObservableVar):
 
 
 class NoteObject(AsDictObject):  # TODO: remember to update asdictobject in the other module
-    time = datetime.now().timestamp()
+    time = dt.datetime.now().timestamp()
     content = 'Placeholder'
     detail = 'Placeholder'
     type = []
@@ -97,6 +98,7 @@ class ListBaseModel(BaseModel):  # might do some try blocks to make sure it's a 
     def pop(self, index):  # might use getattr instead
         return self.var.data.pop(index)
 
+
 class TimeModel(BaseModel):
     def get(self, as_string=True):
         if as_string:
@@ -109,7 +111,7 @@ class TimeModel(BaseModel):
 
     def set_string(self, iso_time, on_timestamp_validate=lambda is_validated: None):
         try:
-            time = datetime.fromisoformat(str(iso_time)).replace(microsecond=0, second=0)
+            time = dt.datetime.fromisoformat(str(iso_time)).replace(microsecond=0, second=0)
             super().set(time)
             on_timestamp_validate(True)
         except:
@@ -121,19 +123,62 @@ class TimeModel(BaseModel):
             func(value)
         super().on_change(func_with_value_as_str)
 
+
+class DurationModel(BaseModel):
+    def get(self, as_string=True):
+        if as_string:
+            return str(self.var.get())
+        else:
+            return self.var.data
+
+    def to_simple_str(self, time):
+        hour = time.hour
+        minute = time.minute
+        if hour == 0:
+            return str(minute)  # 30 == 30 minutes
+        else:
+            return str(hour + round(minute / 60, 2))  # 1.5 == 1 hour 30 minutes
+
+    def from_simple_str(self, val):
+        data_lst = val.split('.')
+        if len(data_lst) == 1:
+            hour = 0
+            minute = int(data_lst[0])
+        elif len(data_lst) == 2:
+            hour = int(data_lst[0])
+            minute = round(float(f'0.{data_lst[1]}') * 60)
+        return dt.time(hour=hour, minute=minute)
+
+    def set_string(self, time_str, on_validate=lambda is_validated: None):
+        # time_str is 5.34 (hours) or 15 (minutes)
+        try:
+            duration = self.from_simple_str(time_str)
+            self.set(duration)
+            on_validate(True)
+        except:
+            on_validate(False)
+
+    def on_change(self, func):
+        def func_with_value_as_simple_str(value):
+            value = self.to_simple_str(value)
+            func(value)
+        super().on_change(func_with_value_as_simple_str)
+
+
 class DateModel(BaseModel):
     def get(self, as_string=True):
         if as_string:
             return str(self.var.get())
         else:
             return self.var.data
-    
+
     def set_string(self, iso_time):
         try:
-            date_to_set = date.fromisoformat(str(iso_time))
+            date_to_set = dt.date.fromisoformat(str(iso_time))
             super().set(date_to_set)
         except:
             print('Could not convert time str to date:', iso_time)
+
 
 class SelectedTypeModel(BaseModel):
     pass
