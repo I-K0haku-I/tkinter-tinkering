@@ -6,27 +6,26 @@ from utils.db_manager import get_db_manager
 
 import logic.models as m
 
-ID_POS_IN_TUPLE = 6
 
 class DayOverviewController:
     def __init__(self):
         self.db = get_db_manager()
         self.cached_dates = {}
         self.clear_list_func = lambda: None
-        self.header = (('time', 0.15), ('note', 0.425), ('duration', 0.075), ('unit', 0.0625), ('type', 0.1), ('tags', 0.1875))
+        header_sizes = (0.15, 0.5, 0.075, 0.0625, 0.28)
+        self.header = tuple(zip(m.NOTE_COL_NAMES, header_sizes))
 
         self.note_list = m.NoteListModel([])
         self.date = m.DateModel(0)
 
     def init_values(self):
         # self.db.get_tags(refresh=True)
-        # self.db.get_type(refresh=True)
         self.date.set(date.today())
-        self.load_other()
+        # self.load_other()
         self.load_note_list()
     
-    def load_other(self):
-        asyncio.create_task(self.db.load_types())
+    # def load_other(self):
+    #     asyncio.create_task(self.db.load_types())
 
     def refresh(self):
         self.cached_dates.pop(self.date.get(), None)
@@ -89,7 +88,7 @@ class DayOverviewController:
         return asyncio.create_task(self.delete_async(index))
 
     async def delete_async(self, index):
-        id = self.note_list.get_by(index)[ID_POS_IN_TUPLE]
+        id = self.note_list.get_by(index).id
         r = await self.db.notes.destroy(id)
         if r.status in (204,):
             note = self.note_list.pop(index)
@@ -103,7 +102,7 @@ class DayOverviewController:
         self.note_list.set([])
 
     def get_selected_note_id(self, index):
-        return self.note_list.get_by(index)[ID_POS_IN_TUPLE]  # very ugly, magic numbers could be removed to solve it
+        return self.note_list.get_by(index).id
 
     def get_new_pos(self, new_note):
         i = -1
@@ -133,14 +132,14 @@ class DayOverviewController:
           # it would be better overall, if we would access it not by id but by some other more clear interface too
           # below we would not need to convert the note to values like that for example.
         for i, val in enumerate(self.note_list.var.data):
-            if val[ID_POS_IN_TUPLE] == note['id']:
+            if val.id == note['id']:
                 self.note_list.set_by(i, self.convert_to_values(note))
                 self.note_list.move_item(i, self.get_new_pos(note))
                 date = note['time'].strftime('%Y-%m-%d')
                 self.cached_dates[date][i] = note
                 break
 
-    def convert_to_values(self, note):
+    def convert_to_values(self, note):  # TODO: feels like it should be in its own model, in NoteListModel?
         duration = m.DurationModel(note['duration']).to_simple_str()
         duration_unit = 'HOURS' if '.' in duration else 'MINS'
-        return (note['time'], note['content'], duration, duration_unit, note['type'], note['tags'], note['id'])
+        return m.NoteRow(note['time'], note['content'], duration, duration_unit, note['tags'], note['id'])

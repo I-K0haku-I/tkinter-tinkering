@@ -2,8 +2,15 @@ import re
 import tkinter as tk
 import datetime as dt
 
+from collections import namedtuple
+
 from base_api_connector import AsDictObject
 from utils.db_manager import get_db_manager
+
+NOTE_COL_NAMES = 'time note duration unit tags id'
+NoteRow = namedtuple('NoteRow', NOTE_COL_NAMES)
+NOTE_COL_NAMES = tuple(NOTE_COL_NAMES.split(' '))
+print('note col names:', NOTE_COL_NAMES)
 
 
 class ObservableVar:
@@ -46,7 +53,6 @@ class NoteObject(AsDictObject):  # TODO: remember to update asdictobject in the 
     time = dt.datetime.now().timestamp()
     content = 'Placeholder'
     detail = 'Placeholder'
-    type = []
     tags = []
 
 
@@ -180,14 +186,6 @@ class DateModel(BaseModel):
             super().set(date_to_set)
         except:
             print('Could not convert time str to date:', iso_time)
-
-
-class SelectedTypeModel(BaseModel):
-    pass
-
-
-class TypeListModel(ListBaseModel):
-    pass
 
 
 class SelectedTagsListModel(ListBaseModel):

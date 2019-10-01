@@ -48,11 +48,11 @@ class AddNotesView(tk.Frame):
         self.duration_field.on_write(lambda val: self.controller.duration.set_string(val, self.get_color_func(self.duration_field.entry)))
         self.controller.duration.on_change(self.duration_field.set_var)
 
-        self.type_field = ComboboxField(self.main_frame, label_text='Type:')
-        self.type_field.pack(side='top', fill='both', expand=True)
-        self.type_field.on_write(self.controller.selected_type.set)
-        self.controller.selected_type.on_change(self.type_field.set_var)
-        self.controller.types_list.on_change(self.type_field.set_dropdown)
+        # self.type_field = ComboboxField(self.main_frame, label_text='Type:')
+        # self.type_field.pack(side='top', fill='both', expand=True)
+        # self.type_field.on_write(self.controller.selected_type.set)
+        # self.controller.selected_type.on_change(self.type_field.set_var)
+        # self.controller.types_list.on_change(self.type_field.set_dropdown)
 
         self.tags_field = EntryField(self.main_frame, label_text='Tags:')
         self.tags_field.pack(side='top', fill='both', expand=True)

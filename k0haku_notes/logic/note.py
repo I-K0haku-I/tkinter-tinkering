@@ -12,7 +12,6 @@ class NoteObject(AsDictObject): # TODO: remember to update asdictobject in the o
     duration = str(dt.time())
     content = 'Placeholder'
     detail = 'Placeholder'
-    type = ''
     tags = []
 
 
@@ -25,8 +24,6 @@ class AddNotesAdapter:
         
         self.timestamp = m.TimeModel(0)
         self.duration = m.DurationModel(0)
-        self.selected_type = m.SelectedTypeModel('')
-        self.types_list = m.TypeListModel([])
         self.selected_tags_list = m.SelectedTagsListModel([])
         self.content = m.ContentModel('')
         self.comment = m.CommentModel('')
@@ -34,8 +31,6 @@ class AddNotesAdapter:
     def init_values(self, time=None):
         self.timestamp.set(dt.datetime.now() if time is None else time)
         self.duration.set(dt.time())
-        types_list = [type['name'] for type in self.db_manager.get_type()]
-        self.types_list.set(types_list)
 
         if self.id is not None:
             self.load()
@@ -54,7 +49,6 @@ class AddNotesAdapter:
 
         self.timestamp.set(note_dict['time'])
         self.duration.set(note_dict['duration'])
-        self.selected_type.set(note_dict['type'])
         self.selected_tags_list.set(note_dict['tags'])
         self.content.set(note_dict['content'])
         self.comment.set(note_dict['detail'])
@@ -69,7 +63,6 @@ class AddNotesAdapter:
         note.duration = self.duration.get()
         note.content = self.content.get()
         note.detail = self.comment.get()
-        note.type = await self.db_manager.get_type_id_async(self.selected_type.get())
         tags = self.selected_tags_list.get()
         note.tags = self.db_manager.get_tags_ids([] if not tags or tags == [''] else tags)
 
@@ -89,7 +82,6 @@ class AddNotesAdapter:
         note.time = dt.datetime.strftime(self.timestamp.get(as_string=False), "%Y-%m-%dT%H:%M:%SZ")
         note.content = self.content.get()
         note.detail = self.comment.get()
-        note.type = self.db_manager.get_type_id(self.selected_type.get())
         tags = self.selected_tags_list.get()
         note.tags = self.db_manager.get_tags_ids([] if not tags or tags == [''] else tags)
 
