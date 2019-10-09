@@ -5,7 +5,7 @@ CONFIG_PATH = 'config.ini'
 
 def create_default(conf):
     conf['API'] = {
-        'url': 'http://127.0.0.1:8000/notes-backend/',
+        'url': 'http://127.0.0.1:8000/b/api/',
         'pass': 'yourpasswordhere'
     }
     with open(CONFIG_PATH, 'w') as f:

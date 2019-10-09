@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from logic.note import AddNotesAdapter
-from .widgets import AutoScrollbar, ScrollableFrame, TimeField, ComboboxField, EntryField, TextField
+from .widgets import AutoScrollbar, ScrollableFrame, TimeField, ComboboxField, EntryField, TextField, DurationField
 
 
 class AddNotesView(tk.Frame):
@@ -43,10 +43,18 @@ class AddNotesView(tk.Frame):
         self.time_field.on_write(lambda val: self.controller.timestamp.set_string(val, self.get_color_func(self.time_field.entry)))
         self.controller.timestamp.on_change(self.time_field.set_var)
 
-        self.duration_field = EntryField(self.main_frame, label_text='Duration:')
+        # self.duration_frame = tk.Frame(self.main_frame)
+        # self.duration_frame.pack(side='top', fill='both', expand=True)
+    
+        self.duration_field = DurationField(self.main_frame, label_text='Duration:')
+        # self.duration_field.grid(row=0, column=0, columnspan=5, sticky='nsew')
         self.duration_field.pack(side='top', fill='both', expand=True)
         self.duration_field.on_write(lambda val: self.controller.duration.set_string(val, self.get_color_func(self.duration_field.entry)))
         self.controller.duration.on_change(self.duration_field.set_var)
+        self.duration_field.stop_btn.config(command=self.controller.calc_duration)
+        # self.stop_btn = tk.Button(self.duration_frame, text='!')
+        # self.stop_btn.pack(side='left', fill='both', expand=True)
+        # self.stop_btn.grid(row=0, column=3, sticky='nsew')
 
         # self.type_field = ComboboxField(self.main_frame, label_text='Type:')
         # self.type_field.pack(side='top', fill='both', expand=True)
@@ -78,11 +86,13 @@ class AddNotesView(tk.Frame):
 
         self.savebtn = ttk.Button(self, text='Save')
         self.savebtn.grid(row=1, column=0, columnspan=2, sticky='nswe')
+        # self.savebtn.pack(side='right', fill='both', expand=True)
         # self.grid_rowconfigure(1, minsize=100)
         self.savebtn.config(command=self.save)
 
         # self.closebtn = ttk.Button(self.buttons_down, text='Close')
-        # self.closebtn.grid(row=0, column=2, sticky='nswe')
+        # self.closebtn.grid(row=1, column=1, sticky='nswe')
+        # self.closebtn.pack(side='right', fill='both', expand=True)
         # self.closebtn.config(command=self.destroy)
     
     def get_color_func(self, elem):

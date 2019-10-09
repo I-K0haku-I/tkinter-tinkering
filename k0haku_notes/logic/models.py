@@ -10,7 +10,6 @@ from utils.db_manager import get_db_manager
 NOTE_COL_NAMES = 'time note duration unit tags id'
 NoteRow = namedtuple('NoteRow', NOTE_COL_NAMES)
 NOTE_COL_NAMES = tuple(NOTE_COL_NAMES.split(' '))
-print('note col names:', NOTE_COL_NAMES)
 
 
 class ObservableVar:

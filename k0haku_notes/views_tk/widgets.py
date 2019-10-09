@@ -99,6 +99,24 @@ class EntryField(FieldFrame):
 
         self.entry = entry
 
+class DurationField(EntryField):
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+
+        stop_btn = ttk.Button(self, text='!')
+        # stop_btn.config(height=1, width=1)
+        # self.label.grid(column=0, row=0, columnspan=4, sticky='nswe')
+        self.label.pack_forget()
+        self.entry.pack_forget()
+        self.label.pack(side='top', fill='both', expand=True)
+        self.entry.pack(side='left', fill='both', expand=True)
+        stop_btn.pack(side='left', fill='both', expand=True)
+        # self.entry.grid(column=0, row=1, columnspan=3, sticky='nswe')
+
+        # stop_btn.grid(column=3, row=1, columnspan=3, sticky='nswe')
+
+        self.stop_btn = stop_btn
+
 
 class TimeField(EntryField):
     def __init__(self, parent, *args, **kwargs):

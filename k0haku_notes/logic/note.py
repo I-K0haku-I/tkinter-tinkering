@@ -90,6 +90,15 @@ class AddNotesAdapter:
         else:
             r = self.db_manager.notes.create(note.as_dict())
         return r
+    
+    def calc_duration(self):
+        start_time = self.timestamp.get(as_string=False)
+        new_duration = dt.datetime.now() - start_time
+        # convert from timedelta to time
+        new_duration = (dt.datetime.min + new_duration).time()
+        self.duration.set(new_duration)
+        
+
 
     # def init_values(self):
     #     self.set_timestamp(datetime.today())
