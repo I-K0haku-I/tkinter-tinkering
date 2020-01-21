@@ -54,7 +54,7 @@ class DBManager:
     #         # .run_until_complete(self.load_types())
     #         # self._types = self.types.list().json()
     #     return self._types
-    
+
     # async def get_type_async(self):
     #     if self._types is None:
     #         self._types = await self.load_types()
@@ -68,7 +68,7 @@ class DBManager:
     # def get_type_id(self, type_str):
     #     if not type_str:
     #         return ''
-        
+
     #     for type in self.get_type():
     #         if type['name'] == type_str:
     #             return type['id']
@@ -132,7 +132,11 @@ class DBManager:
         # TODO: make time return timestamp
         new_note_dict = note_dict.copy()
 
-        new_note_dict['time'] = dt.datetime.strptime(new_note_dict['time'], "%Y-%m-%dT%H:%M:%SZ")
+        try:
+            new_note_dict['time'] = dt.datetime.strptime(new_note_dict['time'], "%Y-%m-%dT%H:%M:%SZ")
+        except ValueError:
+            new_note_dict['time'] = dt.datetime.strptime(new_note_dict['time'], "%Y-%m-%dT%H:%M:%S.%fZ")
+            new_note_dict['time'] = new_note_dict['time'].replace(microsecond=0)
         new_note_dict['duration'] = dt.datetime.strptime(new_note_dict['duration'], "%H:%M:%S").time()
         new_note_dict['tags'] = self.get_tags_by_ids(new_note_dict['tags'])
 

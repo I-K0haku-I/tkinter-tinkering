@@ -1,5 +1,8 @@
+import os
 import configparser
 
+# enable for creating executable
+# CONFIG_PATH = os.path.expanduser('~/notes-config.ini')
 CONFIG_PATH = 'config.ini'
 
 
