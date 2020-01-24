@@ -3,6 +3,7 @@ import configparser
 
 # enable for creating executable
 # CONFIG_PATH = os.path.expanduser('~/notes-config.ini')
+# honeslty, we don't even need this if we keep the executable in a folder and the config right next to it
 CONFIG_PATH = 'config.ini'
 
 

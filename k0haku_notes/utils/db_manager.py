@@ -137,7 +137,11 @@ class DBManager:
         except ValueError:
             new_note_dict['time'] = dt.datetime.strptime(new_note_dict['time'], "%Y-%m-%dT%H:%M:%S.%fZ")
             new_note_dict['time'] = new_note_dict['time'].replace(microsecond=0)
-        new_note_dict['duration'] = dt.datetime.strptime(new_note_dict['duration'], "%H:%M:%S").time()
+        try:
+            new_note_dict['duration'] = dt.datetime.strptime(new_note_dict['duration'], "%H:%M:%S").time()
+        except ValueError:
+            new_note_dict['duration'] = dt.datetime.strptime(new_note_dict['duration'], "%H:%M:%S.%f").time()
+            new_note_dict['duration'] = new_note_dict['duration'].replace(microsecond=0)
         new_note_dict['tags'] = self.get_tags_by_ids(new_note_dict['tags'])
 
         return new_note_dict
